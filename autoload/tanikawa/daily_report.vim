@@ -1,8 +1,14 @@
 scriptencoding cp932
 
 function! tanikawa#daily_report#MkDailyReport(title) abort
+	if exists("g:daily_report_dir")
+		let l:daily_report_dir = g:daily_report_dir
+	else
+		let l:daily_report_dir = "."
+	endif
+
 	if 0 < len(a:title)
-		let title = a:title
+		let title = a:title.'_ì‹Æ•ñ'
 	else
 		let title = strftime('%Y%m%d_ì‹Æ•ñ')
 	endif
@@ -10,9 +16,9 @@ function! tanikawa#daily_report#MkDailyReport(title) abort
 	let filename = printf("%s.txt", title)
 
 	if filereadable(filename)
-		exec 'edit' filename
+		exec 'edit' l:daily_report_dir.'/'.filename
 	else
-		exec 'new' filename
+		exec 'new' l:daily_report_dir.'/'.filename
 	endif
 
 	nnoremap <buffer><silent> <C-C> :%y*<CR>
