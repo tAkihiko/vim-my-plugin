@@ -14,7 +14,7 @@ function! tanikawa#memo#MkMemo(title) abort
 	endif
 	let text_list = systemlist(cmd)
 	call map(text_list, {key, val -> substitute(val, '\r', '', 'g') })
-	call map(text_list, {key, val -> substitute(val, '^.*[\/]\(\d\{2}_\.txt\)$', '\1', 'g') })
+	call map(text_list, {key, val -> substitute(val, '^\%(.*[\/]\)\?\(\d\{2}_[^\/]*\.txt\)$', '\1', 'g') })
 
 	let cnt = 0
 	for memo in text_list
@@ -57,7 +57,7 @@ function! tanikawa#memo#EdMemo() abort
 	endif
 	let text_list = systemlist(cmd)
 	call map(text_list, {key, val -> substitute(val, '\r', '', 'g') })
-	call map(text_list, {key, val -> substitute(val, '^.*[\/]\(\d\{2}_\.txt\)$', '\1', 'g') })
+	call map(text_list, {key, val -> substitute(val, '^\%(.*[\/]\)\?\(\d\{2}_[^\/]*\.txt\)$', '\1', 'g') })
 
 	let memo_list = []
 	for memo in text_list
