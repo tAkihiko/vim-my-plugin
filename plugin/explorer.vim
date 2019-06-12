@@ -1,8 +1,13 @@
 scriptencoding cp932
 
-command! -nargs=1 -complete=file Exp call <SID>Explorer(<q-args>)
+command! -nargs=? -complete=file Exp call <SID>Explorer(<q-args>)
 function! s:Explorer( target )
-	let l:target = expand( a:target )
+	if len(a:target) <= 0
+		let l:target = expand('%')
+	else
+		let l:target = expand( a:target )
+	endif
+
 	if has('win32') || has('win64')
 		if isdirectory( l:target )
 			call system( 'explorer ' . l:target )
