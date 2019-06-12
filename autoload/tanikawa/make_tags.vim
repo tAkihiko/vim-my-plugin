@@ -24,7 +24,8 @@ endfunction
 
 function! s:MakeTags_CS()
 	echo "CS"
-	let cmd = 'ctags --languages=C# --c#-kinds=cdegmstn --fields=imaS -f cs.tags -R .'
+	" --c#-kinds はデフォルトのまま
+	let cmd = 'ctags --languages=C# --fields=+imaS -f cs.tags -R .'
 	call system(cmd)
 endfunction
 
@@ -34,6 +35,6 @@ endfunction
 
 function! s:MakeTags_All()
 	echo "ALL"
-	let cmd = 'ctags --fields=imaS -f tags -R .'
+	let cmd = 'ctags --fields=+imaS -f tags -R .'
 	call system(cmd)
 endfunction
