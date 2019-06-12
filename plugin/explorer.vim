@@ -2,6 +2,7 @@ scriptencoding cp932
 
 command! -nargs=? -complete=file Exp call <SID>Explorer(<q-args>)
 function! s:Explorer( target )
+
 	if len(a:target) <= 0
 		let l:target = expand('%')
 	else
@@ -17,5 +18,6 @@ function! s:Explorer( target )
 	else
 		echoerr "–¢‘Î‰ž"
 	endif
+
 endfunction
 
