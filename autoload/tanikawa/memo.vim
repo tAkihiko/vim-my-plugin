@@ -43,7 +43,7 @@ function! tanikawa#memo#MkMemo(title) abort
 
 endfunction
 
-function! tanikawa#memo#EdMemo() abort
+function! tanikawa#memo#EdMemo(preview_mode) abort
 	if exists("g:memo_dir")
 		let l:memo_dir = g:memo_dir
 	else
@@ -82,6 +82,10 @@ function! tanikawa#memo#EdMemo() abort
 		return
 	endif
 
-	exec 'split' l:memo_dir.'/'.memo_list[sel_nr-1]
+	if a:preview_mode == 1
+		exec 'pedit' l:memo_dir.'/'.memo_list[sel_nr-1]
+	else
+		exec 'split' l:memo_dir.'/'.memo_list[sel_nr-1]
+	endif
 
 endfunction

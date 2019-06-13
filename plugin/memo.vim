@@ -1,6 +1,7 @@
 scriptencoding cp932
 
 command! -nargs=? MkMemo call tanikawa#memo#MkMemo(<q-args>)
-command! EdMemo call tanikawa#memo#EdMemo()
+command! EdMemo call tanikawa#memo#EdMemo(0)
+command! ShowMemo call tanikawa#memo#EdMemo(1)
 
 " vim: fdm=marker
