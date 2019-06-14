@@ -1,3 +1,4 @@
+" Author: 谷川陽彦 <pureodio1109@gmail.com>
 scriptencoding utf-8
 
 function! tanikawa#daily_report#MkDailyReport(title) abort
