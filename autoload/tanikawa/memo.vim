@@ -9,10 +9,13 @@ function! tanikawa#memo#MkMemo(title) abort
 
 	if has('win32') || has('win64')
 		let cmd = 'dir /b '.l:memo_dir.'\*.txt'
+		let enc = 'sjis'
 	else
 		let cmd = 'ls '.l:memo_dir.'/*.txt'
+		let enc = 'utf-8'
 	endif
 	let text_list = systemlist(cmd)
+	call map(text_list, {key, val -> iconv(val, enc, &enc) })
 	call map(text_list, {key, val -> substitute(val, '\r', '', 'g') })
 	call map(text_list, {key, val -> substitute(val, '^\%(.*[\/]\)\?\(\d\{2}_[^\/]*\.txt\)$', '\1', 'g') })
 
@@ -52,10 +55,13 @@ function! tanikawa#memo#EdMemo(preview_mode) abort
 
 	if has('win32') || has('win64')
 		let cmd = 'dir /b '.l:memo_dir.'\*.txt'
+		let enc = 'sjis'
 	else
 		let cmd = 'ls '.l:memo_dir.'/*.txt'
+		let enc = 'utf-8'
 	endif
 	let text_list = systemlist(cmd)
+	call map(text_list, {key, val -> iconv(val, enc, &enc) })
 	call map(text_list, {key, val -> substitute(val, '\r', '', 'g') })
 	call map(text_list, {key, val -> substitute(val, '^\%(.*[\/]\)\?\(\d\{2}_[^\/]*\.txt\)$', '\1', 'g') })
 
