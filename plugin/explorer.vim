@@ -2,6 +2,9 @@
 scriptencoding utf-8
 
 command! -nargs=? -complete=file Exp call <SID>Explorer(<q-args>)
+command! GetFName let @+ = expand("%:t")
+command! GetFPath let @+ = expand("%:p")
+
 function! s:Explorer( target )
 
 	if len(a:target) <= 0
