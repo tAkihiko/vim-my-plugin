@@ -1,4 +1,4 @@
-scriptencoding cp932
+scriptencoding utf-8
 
 function! tanikawa#memo#MkMemo(title) abort
 	if exists("g:memo_dir")
@@ -30,7 +30,7 @@ function! tanikawa#memo#MkMemo(title) abort
 		let title = a:title
 	else
 		call inputsave()
-		let title = input('ƒƒ‚‚Ìƒ^ƒCƒgƒ‹‚ÍH > ')
+		let title = input('ãƒ¡ãƒ¢ã®ã‚¿ã‚¤ãƒˆãƒ«ã¯ï¼Ÿ > ')
 		call inputrestore()
 	endif
 	let footer  = '# vim: '

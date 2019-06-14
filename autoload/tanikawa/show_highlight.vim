@@ -1,4 +1,4 @@
-scriptencoding cp932
+scriptencoding utf-8
 
 " VimShowHlGroup: Show highlight group name under a cursor
 function! tanikawa#show_highlight#ShowHlGroup()

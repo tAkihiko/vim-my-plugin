@@ -1,9 +1,9 @@
-scriptencoding cp932
+scriptencoding utf-8
 
 function! tanikawa#make_tags#MakeTags(file_type)
 
 	if !executable('ctags')
-		echoerr "ctags が見つかりません"
+		echoerr "ctags 縺瑚ｦ九▽縺九ｊ縺ｾ縺帙ｓ"
 	endif
 
 	if a:file_type ==? 'c'
@@ -24,7 +24,7 @@ endfunction
 
 function! s:MakeTags_CS()
 	echo "CS"
-	" --c#-kinds はデフォルトのまま
+	" --c#-kinds 縺ｯ繝�繝輔か繝ｫ繝医�ｮ縺ｾ縺ｾ
 	let cmd = 'ctags --languages=C# --fields=+imaSz -f cs.tags -R .'
 	call system(cmd)
 endfunction

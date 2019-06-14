@@ -1,4 +1,4 @@
-scriptencoding cp932
+scriptencoding utf-8
 
 function! tanikawa#daily_report#MkDailyReport(title) abort
 	if exists("g:daily_report_dir")
@@ -8,9 +8,9 @@ function! tanikawa#daily_report#MkDailyReport(title) abort
 	endif
 
 	if 0 < len(a:title)
-		let title = a:title.'_ì‹Æ•ñ'
+		let title = a:title.'_ä½œæ¥­å ±å‘Š'
 	else
-		let title = strftime('%Y%m%d_ì‹Æ•ñ')
+		let title = strftime('%Y%m%d_ä½œæ¥­å ±å‘Š')
 	endif
 
 	let filename = printf("%s.txt", title)

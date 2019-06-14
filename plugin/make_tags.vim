@@ -1,4 +1,4 @@
-scriptencoding cp932
+scriptencoding utf-8
 
 command! MkCTags call tanikawa#make_tags#MakeTags('c')
 command! MkCSTags call tanikawa#make_tags#MakeTags('cs')

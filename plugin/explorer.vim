@@ -1,4 +1,4 @@
-scriptencoding cp932
+scriptencoding utf-8
 
 command! -nargs=? -complete=file Exp call <SID>Explorer(<q-args>)
 function! s:Explorer( target )
@@ -16,7 +16,7 @@ function! s:Explorer( target )
 			call system( 'explorer /select,' . l:target )
 		endif
 	else
-		echoerr "–¢‘Î‰ž"
+		echoerr "æœªå¯¾å¿œ"
 	endif
 
 endfunction
