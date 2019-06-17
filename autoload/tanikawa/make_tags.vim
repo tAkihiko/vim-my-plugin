@@ -26,7 +26,7 @@ endfunction
 function! s:MakeTags_CS()
 	echo "CS"
 	" --c#-kinds はデフォルトのまま
-	let cmd = 'ctags --languages=C# --fields=+imaSz -f cs.tags -R .'
+	let cmd = 'ctags --jcode=utf8 --languages=C# --fields=+imaSz -f cs.tags -R .'
 	call system(cmd)
 endfunction
 
@@ -36,6 +36,6 @@ endfunction
 
 function! s:MakeTags_All()
 	echo "ALL"
-	let cmd = 'ctags --fields=+imaSz -f tags -R .'
+	let cmd = 'ctags --jcode=utf8 --fields=+imaSz -f tags -R .'
 	call system(cmd)
 endfunction
