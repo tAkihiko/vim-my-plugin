@@ -46,6 +46,7 @@ function! tanikawa#memo#MkMemo(title) abort
 
 	call append(line('$'), [title, "", footer])
 	0 delete _
+	call cursor(2, 1)
 
 endfunction
 
