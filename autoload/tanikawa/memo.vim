@@ -38,6 +38,8 @@ function! tanikawa#memo#MkMemo(title) abort
 	let footer .= 'ft=memo et ts=4'
 
 	let filename = printf("%02d_%s.txt", cnt + 1, title)
+	let filename = substitute(filename, '%', '\\%', 'g')
+	let filename = substitute(filename, '#', '\\#', 'g')
 
 	exec 'new' l:memo_dir.'/'.filename
 	setlocal ft=memo et ts=4
@@ -89,10 +91,13 @@ function! tanikawa#memo#EdMemo(preview_mode) abort
 		return
 	endif
 
+	let filename = memo_list[sel_nr-1]
+	let filename = substitute(filename, '%', '\\%', 'g')
+	let filename = substitute(filename, '#', '\\#', 'g')
 	if a:preview_mode == 1
-		exec 'pedit' l:memo_dir.'/'.memo_list[sel_nr-1]
+		exec 'pedit' l:memo_dir.'/'.filename
 	else
-		exec 'split' l:memo_dir.'/'.memo_list[sel_nr-1]
+		exec 'split' l:memo_dir.'/'.filename
 	endif
 
 endfunction
