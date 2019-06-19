@@ -50,7 +50,7 @@ function! tanikawa#memo#MkMemo(title) abort
 
 endfunction
 
-function! tanikawa#memo#EdMemo(preview_mode) abort
+function! tanikawa#memo#EdMemo(preview_mode, title_no) abort
 	if exists("g:memo_dir")
 		let l:memo_dir = g:memo_dir
 	else
@@ -76,17 +76,31 @@ function! tanikawa#memo#EdMemo(preview_mode) abort
 		endif
 	endfor
 
-	let menu_list = copy(memo_list)
-	redraw
-	echo join(map(menu_list, {key, val -> printf('%2d: %s', key+1, substitute(val, '^\d\{2}_\(.*\)\.txt$', '\1', ''))}), "\n")
+	if 0 < len(a:title_no)
+		"
+		" 指定あり: 番号を利用
+		"
 
-	call inputsave()
-	let sel_str = input('> ')
-	call inputrestore()
-	if sel_str =~? '^\s*$'
-		return
+		let sel_nr = str2nr(a:title_no)
+
+	else
+		"
+		" 指定なし: リストを表示し、番号を入力する
+		"
+
+		let menu_list = copy(memo_list)
+		redraw
+		echo join(map(menu_list, {key, val -> printf('%2d: %s', key+1, substitute(val, '^\d\{2}_\(.*\)\.txt$', '\1', ''))}), "\n")
+
+		call inputsave()
+		let sel_str = input('> ')
+		call inputrestore()
+		if sel_str =~? '^\s*$'
+			return
+		endif
+		let sel_nr = str2nr(sel_str)
 	endif
-	let sel_nr = str2nr(sel_str)
+
 	if sel_nr < 1 || len(memo_list) < sel_nr
 		echoerr 'Range Over'
 		return
