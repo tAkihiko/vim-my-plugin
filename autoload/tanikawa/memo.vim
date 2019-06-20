@@ -9,10 +9,10 @@ function! tanikawa#memo#MkMemo(title) abort
 	endif
 
 	if has('win32') || has('win64')
-		let cmd = 'dir /b '.l:memo_dir.'\*.txt'
+		let cmd = 'dir /b '.shellescape(l:memo_dir.'\*.txt')
 		let enc = 'sjis'
 	else
-		let cmd = 'ls '.l:memo_dir.'/*.txt'
+		let cmd = 'ls '.shellescape(l:memo_dir.'/*.txt')
 		let enc = 'utf-8'
 	endif
 	let text_list = systemlist(cmd)
@@ -41,6 +41,7 @@ function! tanikawa#memo#MkMemo(title) abort
 	let filename = substitute(filename, '%', '\\%', 'g')
 	let filename = substitute(filename, '#', '\\#', 'g')
 
+	let l:memo_dir = substitute(l:memo_dir, ' ', '\\ ', 'g')
 	exec 'new' l:memo_dir.'/'.filename
 	setlocal ft=memo et ts=4
 
@@ -58,10 +59,10 @@ function! tanikawa#memo#EdMemo(preview_mode, title_no) abort
 	endif
 
 	if has('win32') || has('win64')
-		let cmd = 'dir /b '.l:memo_dir.'\*.txt'
+		let cmd = 'dir /b '.shellescape(l:memo_dir.'\*.txt')
 		let enc = 'sjis'
 	else
-		let cmd = 'ls '.l:memo_dir.'/*.txt'
+		let cmd = 'ls '.shellescape(l:memo_dir.'/*.txt')
 		let enc = 'utf-8'
 	endif
 	let text_list = systemlist(cmd)
@@ -109,6 +110,7 @@ function! tanikawa#memo#EdMemo(preview_mode, title_no) abort
 	let filename = memo_list[sel_nr-1]
 	let filename = substitute(filename, '%', '\\%', 'g')
 	let filename = substitute(filename, '#', '\\#', 'g')
+	let l:memo_dir = substitute(l:memo_dir, ' ', '\\ ', 'g')
 	if a:preview_mode == 1
 		exec 'pedit' l:memo_dir.'/'.filename
 	else
