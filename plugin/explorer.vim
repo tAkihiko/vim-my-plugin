@@ -12,12 +12,19 @@ function! s:Explorer( target )
 	else
 		let l:target = expand( a:target )
 	endif
+	let l:target = fnamemodify(l:target, ":p")
+	let l:target_path = shellescape(l:target)
 
 	if has('win32') || has('win64')
-		if isdirectory( l:target )
-			call system( 'explorer ' . l:target )
+		if exists("g:explorer_cmd")
+			let l:explorer_cmd = shellescape(g:explorer_cmd)
 		else
-			call system( 'explorer /select,' . l:target )
+			let l:explorer_cmd = 'explorer'
+		endif
+		if isdirectory( l:target )
+			call system( l:explorer_cmd . ' ' . l:target_path )
+		else
+			call system( l:explorer_cmd . ' /select,' . l:target_path )
 		endif
 	else
 		echoerr "未対応"
