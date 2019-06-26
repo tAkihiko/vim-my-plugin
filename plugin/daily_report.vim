@@ -20,13 +20,13 @@ function! s:CompDailyReport( arglead, cmdline, curpos )
 	call map(text_list, {key, val -> substitute(val, '^\%(.*[\/]\)\?\(\d\+\)_[^\/]*\.txt$', '\1', 'g') })
 
 	let ret_list = []
-	let match_strs = [
-				\ '^' . a:arglead,
-				\ '^\d\{4,}' . a:arglead,
-				\ ]
-	let match_str = join(match_strs, '\|')
+	let year_match_fmt = '^' . a:arglead
+	let date_match_fmt = '^\d\{4,}' . a:arglead
 	for text_line in text_list
-		if text_line =~? match_str
+		if 4 < len(a:arglead) && text_line =~? year_match_fmt
+			" 逆順に詰めていく
+			call insert(ret_list, text_line)
+		elseif text_line =~? date_match_fmt
 			" 逆順に詰めていく
 			call insert(ret_list, text_line)
 		endif
