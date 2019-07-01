@@ -10,8 +10,12 @@ function! s:SetSourceCodeCheckMode(set)
 		" Quick fix list
 		let g:pre_nmap_n = maparg('<C-N>', 'n', v:false, v:true)
 		let g:pre_nmap_p = maparg('<C-P>', 'n', v:false, v:true)
+		let g:pre_nmap_gn = maparg('g<C-N>', 'n', v:false, v:true)
+		let g:pre_nmap_gp = maparg('g<C-P>', 'n', v:false, v:true)
 		nnoremap <silent> <C-N> :cn<CR>
 		nnoremap <silent> <C-P> :cp<CR>
+		nnoremap <silent> g<C-N> :cnewer<CR>
+		nnoremap <silent> g<C-P> :colder<CR>
 		command! UnSetChkMode call <SID>SetSourceCodeCheckMode(0)
 		delcommand SetChkMode
 		delcommand SetChkModeL
@@ -20,31 +24,34 @@ function! s:SetSourceCodeCheckMode(set)
 		" Location list
 		let g:pre_nmap_n = maparg('<C-N>', 'n', v:false, v:true)
 		let g:pre_nmap_p = maparg('<C-P>', 'n', v:false, v:true)
+		let g:pre_nmap_gn = maparg('g<C-N>', 'n', v:false, v:true)
+		let g:pre_nmap_gp = maparg('g<C-P>', 'n', v:false, v:true)
 		nnoremap <silent> <C-N> :lnext<CR>
 		nnoremap <silent> <C-P> :lprev<CR>
+		nnoremap <silent> g<C-N> :lnewer<CR>
+		nnoremap <silent> g<C-P> :lolder<CR>
 		command! UnSetChkMode call <SID>SetSourceCodeCheckMode(0)
 		delcommand SetChkMode
 		delcommand SetChkModeL
 
 	else
-		if empty(g:pre_nmap_n) || g:pre_nmap_n.rhs == "" || g:pre_nmap_n.rhs == "<Nop>"
-			nunmap <C-N>
-		elseif g:pre_nmap_n.noremap == v:false
-			exec 'nmap <C-P>' g:pre_nmap_n.rhs
-		else
-			exec 'nnoremap <C-N>' g:pre_nmap_n.rhs
-		endif
-
-		if empty(g:pre_nmap_p) || g:pre_nmap_p.rhs == "" || g:pre_nmap_p.rhs == "<Nop>"
-			nunmap <C-P>
-		elseif g:pre_nmap_p.noremap == v:false
-			exec 'nmap <C-P>' g:pre_nmap_p.rhs
-		else
-			exec 'nnoremap <C-P>' g:pre_nmap_p.rhs
-		endif
+		call s:ResetNMap( '<C-N>', g:pre_nmap_n )
+		call s:ResetNMap( '<C-P>', g:pre_nmap_p )
+		call s:ResetNMap( 'g<C-N>', g:pre_nmap_gn )
+		call s:ResetNMap( 'g<C-P>', g:pre_nmap_gp )
 
 		delcommand UnSetChkMode
 		command! SetChkMode call <SID>SetSourceCodeCheckMode(1)
 		command! SetChkModeL call <SID>SetSourceCodeCheckMode(2)
+	endif
+endfunction
+
+function! s:ResetNMap( maparg, mapparam )
+	if empty(a:mapparam) || a:mapparam.rhs == "" || a:mapparam.rhs == "<Nop>"
+		exec 'nunmap' a:maparg
+	elseif a:mapparam.noremap == v:false
+		exec 'nmap' a:maparg a:mapparam.rhs
+	else
+		exec 'nnoremap' a:maparg a:mapparam.rhs
 	endif
 endfunction
