@@ -14,8 +14,8 @@ function! s:SetSourceCodeCheckMode(set)
 		let g:pre_nmap_gp = maparg('g<C-P>', 'n', v:false, v:true)
 		nnoremap <silent> <C-N> :cn<CR>
 		nnoremap <silent> <C-P> :cp<CR>
-		nnoremap <silent> g<C-N> :cnewer<CR>
-		nnoremap <silent> g<C-P> :colder<CR>
+		nnoremap <silent> g<C-N> :cnewer<CR>:cc<CR>
+		nnoremap <silent> g<C-P> :colder<CR>:cc<CR>
 		command! UnSetChkMode call <SID>SetSourceCodeCheckMode(0)
 		delcommand SetChkMode
 		delcommand SetChkModeL
@@ -28,8 +28,8 @@ function! s:SetSourceCodeCheckMode(set)
 		let g:pre_nmap_gp = maparg('g<C-P>', 'n', v:false, v:true)
 		nnoremap <silent> <C-N> :lnext<CR>
 		nnoremap <silent> <C-P> :lprev<CR>
-		nnoremap <silent> g<C-N> :lnewer<CR>
-		nnoremap <silent> g<C-P> :lolder<CR>
+		nnoremap <silent> g<C-N> :lnewer<CR>:ll<CR>
+		nnoremap <silent> g<C-P> :lolder<CR>:ll<CR>
 		command! UnSetChkMode call <SID>SetSourceCodeCheckMode(0)
 		delcommand SetChkMode
 		delcommand SetChkModeL
