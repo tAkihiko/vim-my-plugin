@@ -17,7 +17,7 @@ function! s:CompWeeklyReport( arglead, cmdline, curpos )
 	endif
 	let text_list = systemlist(cmd)
 	call map(text_list, {key, val -> substitute(val, '\r', '', 'g') })
-	call map(text_list, {key, val -> substitute(val, '^\%(.*[\/]\)\?\(\d\+\)\.txt$', '\1', 'g') })
+	call map(text_list, {key, val -> substitute(val, '^\%(.*[\/]\)\?\(\d\+\)\.wr\.txt$', '\1', 'g') })
 
 	let ret_list = []
 	let year_match_fmt = '^' . a:arglead
