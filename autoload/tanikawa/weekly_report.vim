@@ -1,6 +1,21 @@
 " Author: 谷川陽彦 <pureodio1109@gmail.com>
 scriptencoding utf-8
 
+function! tanikawa#weekly_report#CheckFileType(fname) abort
+	if exists("g:weekly_report_dir")
+		let fullpath = escape(fnameescape(fnamemodify(a:fname, ':p')), '\')
+		let target = escape(fnameescape(fnamemodify(g:weekly_report_dir, ':p')), '\')
+
+		" \ がうまく動かないので % に置換
+		let fullpath = substitute(fullpath, '\', '%', 'g')
+		let target = substitute(target, '\', '%', 'g')
+
+		if 0 <= match(fullpath, target)
+			set filetype=weekly_report
+		endif
+	endif
+endfunction
+
 function! tanikawa#weekly_report#MkWeeklyReport(title) abort
 	if exists("g:weekly_report_dir")
 		let l:weekly_report_dir = g:weekly_report_dir
@@ -31,7 +46,7 @@ function! tanikawa#weekly_report#MkWeeklyReport(title) abort
 		return
 	endif
 
-	let filename_today = l:weekly_report_dir . '/' . printf("%s.txt", title)
+	let filename_today = l:weekly_report_dir . '/' . printf("%s.wr.txt", title)
 	let filename_zenkai = l:weekly_report_dir . '/' . zenkai
 
 	if filereadable(filename_today)
