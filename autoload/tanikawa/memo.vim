@@ -38,8 +38,7 @@ function! tanikawa#memo#MkMemo(title) abort
 	let footer .= 'ft=memo et ts=4'
 
 	let filename = printf("%02d_%s.txt", cnt + 1, title)
-	let filename = substitute(filename, '%', '\\%', 'g')
-	let filename = substitute(filename, '#', '\\#', 'g')
+	let filename = fnameescape(filename)
 
 	let l:memo_dir = substitute(l:memo_dir, ' ', '\\ ', 'g')
 	exec 'new' l:memo_dir.'/'.filename
