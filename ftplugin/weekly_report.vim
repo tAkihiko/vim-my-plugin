@@ -10,8 +10,4 @@ let b:did_ftplugin = 1
 setlocal expandtab
 setlocal tabstop=4 shiftwidth=0
 
-syntax match wrTitle /^\S.*$/
-
-highlight link wrTitle Title
-
 let b:undo_ftplugin = "setl et< ts< sw<"
