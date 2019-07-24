@@ -54,8 +54,11 @@ function! tanikawa#weekly_report#MkWeeklyReport(title) abort
 		exec 'silent edit' filename_today
 	else
 		echo 'new' filename_today
-		exec 'silent edit' filename_zenkai
-		exec 'silent saveas' filename_today
+		exec 'silent new' filename_today
+		if filereadable(filename_zenkai)
+			exec 'silent read' filename_zenkai
+			0 delete _
+		endif
 	endif
 
 	setlocal expandtab tabstop=4
