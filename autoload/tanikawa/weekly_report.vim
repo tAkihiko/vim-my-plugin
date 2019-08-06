@@ -49,12 +49,18 @@ function! tanikawa#weekly_report#MkWeeklyReport(title) abort
 	let filename_today = l:weekly_report_dir . '/' . printf("%s.wr.txt", title)
 	let filename_zenkai = l:weekly_report_dir . '/' . zenkai
 
+	" ファイルの開き方を設定
+	let edit_cmd = 'new'
+	if expand('%') == "" && &mod == 0
+		let edit_cmd = 'edit'
+	endif
+
 	if filereadable(filename_today)
 		echo 'edit' filename_today
-		exec 'silent edit' filename_today
+		exec 'silent' edit_cmd filename_today
 	else
 		echo 'new' filename_today
-		exec 'silent enew' filename_today
+		exec 'silent' edit_cmd filename_today
 		if filereadable(filename_zenkai)
 			exec 'silent read' filename_zenkai
 			0 delete _
