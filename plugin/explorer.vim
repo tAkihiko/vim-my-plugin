@@ -1,5 +1,5 @@
-" Author: 谷川陽彦 <pureodio1109@gmail.com>
 scriptencoding utf-8
+" Author: 谷川陽彦 <pureodio1109@gmail.com>
 
 command! -nargs=? -complete=file Exp call <SID>Explorer(<q-args>)
 command! GetFName let @+ = expand("%:t")

@@ -1,5 +1,5 @@
-" Author: 谷川陽彦 <pureodio1109@gmail.com>
 scriptencoding utf-8
+" Author: 谷川陽彦 <pureodio1109@gmail.com>
 
 function! tanikawa#make_tags#MakeTags(file_type)
 

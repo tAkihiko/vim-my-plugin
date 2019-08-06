@@ -1,5 +1,5 @@
-" Author: 谷川陽彦 <pureodio1109@gmail.com>
 scriptencoding utf-8
+" Author: 谷川陽彦 <pureodio1109@gmail.com>
 
 function! tanikawa#memo#MkMemo(title) abort
 	if exists("g:memo_dir")
