@@ -51,7 +51,7 @@ function! tanikawa#weekly_report#MkWeeklyReport(title) abort
 
 	" ファイルの開き方を設定
 	let edit_cmd = 'new'
-	if expand('%') == "" && &mod == 0
+	if expand('%') == "" && &mod == 0 && &bt == ""
 		let edit_cmd = 'edit'
 	endif
 
