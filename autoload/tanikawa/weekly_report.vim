@@ -67,7 +67,6 @@ function! tanikawa#weekly_report#MkWeeklyReport(title) abort
 		endif
 	endif
 
-	setlocal expandtab tabstop=4
-	nnoremap <buffer><silent> <C-C> :%y*<CR>
+	set filetype=weekly_report
 
 endfunction

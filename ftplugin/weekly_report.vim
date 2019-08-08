@@ -10,4 +10,6 @@ let b:did_ftplugin = 1
 setlocal expandtab
 setlocal tabstop=4 shiftwidth=0
 
+nnoremap <buffer><silent> <C-C> :%y*<CR>
+
 let b:undo_ftplugin = "setl et< ts< sw<"
