@@ -67,6 +67,9 @@ function! tanikawa#weekly_report#MkWeeklyReport(title) abort
 		if filereadable(filename_zenkai)
 			exec 'silent read' filename_zenkai
 			0 delete _
+
+			" 以下は文字コードの変換が必要になるため避ける
+			" call setline(1, readfile(filename_zenkai))
 		endif
 	endif
 
