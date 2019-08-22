@@ -21,6 +21,10 @@ endfunction
 
 function! s:MakeTags_C()
 	echo "C"
+	let cmd = 'ctags --jcode=sjis --languages=C,C++ --fields=+imaSz -f c.sjis.tags -R .'
+	call system(cmd)
+	let cmd = 'ctags --jcode=utf8 --languages=C,C++ --fields=+imaSz -f c.utf8.tags -R .'
+	call system(cmd)
 endfunction
 
 function! s:MakeTags_CS()
