@@ -81,7 +81,7 @@ endfunction
 function! tanikawa#weekly_report#AppendWorkTimeCol() abort
 
 	" 時間記入位置までのタブを追加
-	let line = getline(".") . repeat("\t", s:weekly_report_sep_count1)
+	let line = getline(".") . "\t"
 
 	" 行を置き換え
 	call setline(".", line)
@@ -100,9 +100,10 @@ function! tanikawa#weekly_report#Copy() abort
 
 	let lines = getline(1, line("$"))
 	for line in lines
-		let match_list = matchlist(line, repeat("\t", s:weekly_report_sep_count1) . '\(\d\{,2}:\d\{,2}\)')
+		let match_list = matchlist(line, '\t\(\d\{,2}:\d\{,2}\)')
 		if 1 < len(match_list)
 			let time = match_list[1]
+			let line  = substitute(line, "\t", repeat("\t", s:weekly_report_sep_count1), "")
 			let line .= repeat("\t", s:weekly_report_sep_count2) . time
 
 			let [h, m] = split(time, ":")

@@ -8,10 +8,10 @@ endif
 let b:did_ftplugin = 1
 
 setlocal expandtab
-setlocal tabstop=4 shiftwidth=0
+setlocal tabstop=42 softtabstop=4 shiftwidth=4
 
 nnoremap <buffer><silent> <C-C> :<C-U>call tanikawa#weekly_report#Copy()<CR>
 nnoremap <buffer><silent> <C-K> :<C-U>call tanikawa#weekly_report#AppendWorkTimeCol()<CR>
 inoremap <buffer><silent> <C-K> <C-O>:<C-U>call tanikawa#weekly_report#AppendWorkTimeCol()<CR>
 
-let b:undo_ftplugin = "setl et< ts< sw<"
+let b:undo_ftplugin = "setl et< ts< sts< sw<"
