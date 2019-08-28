@@ -69,7 +69,7 @@ function! tanikawa#code_reading#SetSourceCodeCopyMode(set)
 		call s:ResetXMap( '<C-C>', g:pre_xmap_c )
 
 		delcommand UnSetCpMode
-		command! SetCpMode call tanikawa#code_reading#SetSourceCodeCheckMode(1)
+		command! SetCpMode call tanikawa#code_reading#SetSourceCodeCopyMode(1)
 	endif
 endfunction
 
