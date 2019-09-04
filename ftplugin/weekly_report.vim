@@ -8,7 +8,7 @@ endif
 let b:did_ftplugin = 1
 
 setlocal expandtab
-setlocal tabstop=42 softtabstop=4 shiftwidth=4
+setlocal vartabstop=20,42 softtabstop=4 shiftwidth=4
 
 nnoremap <buffer><silent> <C-C> :<C-U>call tanikawa#weekly_report#Copy()<CR>
 nnoremap <buffer><silent> <C-K> :<C-U>call tanikawa#weekly_report#AppendWorkTimeCol()<CR>

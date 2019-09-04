@@ -103,7 +103,7 @@ function! tanikawa#weekly_report#Copy() abort
 		let match_list = matchlist(line, '\t\(\d\{,2}:\d\{,2}\)')
 		if 1 < len(match_list)
 			let time = match_list[1]
-			let line  = substitute(line, "\t", repeat("\t", s:weekly_report_sep_count1), "")
+			let line  = substitute(line, "^[^\t]*\t[^\t]*\\zs\t", repeat("\t", s:weekly_report_sep_count1), "")
 			let line .= repeat("\t", s:weekly_report_sep_count2) . time
 
 			let [h, m] = split(time, ":")
