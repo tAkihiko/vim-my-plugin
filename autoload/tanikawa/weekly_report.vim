@@ -119,3 +119,37 @@ function! tanikawa#weekly_report#Copy() abort
 	echo printf("%d:%02d", hour, min)
 
 endfunction
+
+" 作業時間を加算
+function! tanikawa#weekly_report#AddWorkingTime( time )
+
+	let WEEKLY_REPORT_WORKTIME_PATTERN = '^\(.*\t\)\(\d\+:\d\+\)'
+
+	let line = getline(".")
+	if line !~? '\t\d*:\d\{2}$'
+		return
+	endif
+	let cur_time = substitute(line, WEEKLY_REPORT_WORKTIME_PATTERN, '\2', '')
+
+	let [l:hour, l:min] = map(split(cur_time, ":", 1), {key, val -> str2nr(val)})
+
+	if a:time =~? '^\d*:\d*$'
+		" 1:30, :45
+		let [l:hour, l:min] += map(split(a:time, ":", 1), {key, val -> str2nr(val)})
+	elseif a:time =~? '^\d\+$'
+		let l:min += str2nr(a:time)
+	else
+		echohl Error
+		echo "引数は HH:MM / HH: / MM 形式です"
+		echohl None
+		return
+	endif
+
+	let l:hour += l:min / 60
+	let l:min   = l:min % 60
+
+	let next_line = substitute(line, WEEKLY_REPORT_WORKTIME_PATTERN, '\1'.printf("%d:%02d", l:hour, l:min), '')
+
+	call setline(".", next_line)
+
+endfunction

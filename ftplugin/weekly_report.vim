@@ -14,4 +14,6 @@ nnoremap <buffer><silent> <C-C> :<C-U>call tanikawa#weekly_report#Copy()<CR>
 nnoremap <buffer><silent> <C-K> :<C-U>call tanikawa#weekly_report#AppendWorkTimeCol()<CR>
 inoremap <buffer><silent> <C-K> <C-O>:<C-U>call tanikawa#weekly_report#AppendWorkTimeCol()<CR>
 
+command! -buffer -nargs=1 AddWorkingTime call tanikawa#weekly_report#AddWorkingTime(<f-args>)
+
 let b:undo_ftplugin = "setl et< ts< sts< sw<"
