@@ -7,7 +7,6 @@ endif
 
 runtime! syntax/textile.vim
 
-syntax region rmCollapse start="{{collapse" end="}}" transparent fold contains=ALL
 syntax region rmCodeBlock start='<pre>' end='</pre>'
 
 highlight link rmCodeBlock txtCode
