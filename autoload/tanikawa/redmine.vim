@@ -30,7 +30,7 @@ function! tanikawa#redmine#GetRedmineIssueDescription(issue_id)
 	endif
 
 	call setline('.', split(l:text["issue"]["description"], '\r\%x0'))
-	setlocal filetype=textile
+	setlocal filetype=redmine
 	nnoremap <silent><buffer> <C-C> :%y*<CR>
 
 endfunction
