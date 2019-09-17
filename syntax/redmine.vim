@@ -7,6 +7,8 @@ endif
 
 runtime! syntax/textile.vim
 
+syntax sync minlines=100
+
 syntax region rmCodeBlock start='<pre>' end='</pre>'
 
 syntax match rmTicketNo /#\d\+/
