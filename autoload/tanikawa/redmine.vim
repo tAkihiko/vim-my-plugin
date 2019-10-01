@@ -50,7 +50,8 @@ endfunction
 
 function! tanikawa#redmine#MakeRedmineDiffBranch( branchname )
 	let l:base_branch = get(g:, 'redmine_base_branch', 'HEAD')
-	let last = s:GitCommandList( 'show-branch --merge-base '.l:base_branch.' '.a:branchname )[-1]
+	let last = s:GitCommandList( 'log --pretty=%H '.l:base_branch.'..'.a:branchname )[-1]
+	let last = s:GitCommand( 'log --pretty=%H -1 '.last.'^^' )	" 本当は ^ で、Windows 上で ^ とするため ^^ としている
 	if last =~? '^\x\{1,40}$'
 		let last_h = s:GitCommand('rev-parse '.last)
 		call tanikawa#redmine#MakeRedmineDiffCommit( last_h, a:branchname)
