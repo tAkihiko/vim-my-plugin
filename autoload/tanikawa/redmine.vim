@@ -50,9 +50,9 @@ endfunction
 
 function! tanikawa#redmine#MakeRedmineDiffBranch( branchname )
 	let l:base_branch = get(g:, 'redmine_base_branch', 'HEAD')
-	let last = s:GitCommandList( 'show-branch --sha1-name '.l:base_branch.' '.a:branchname )[-1]
-	if last =~? '^[^[]*\[\(\x\+\)\].*$'
-		let last_h = s:GitCommand('rev-parse '.substitute(last, '^[^[]*\[\(\x\+\)\].*$', '\1', ''))
+	let last = s:GitCommandList( 'show-branch --merge-base '.l:base_branch.' '.a:branchname )[-1]
+	if last =~? '^\x\{1,40}$'
+		let last_h = s:GitCommand('rev-parse '.last)
 		call tanikawa#redmine#MakeRedmineDiffCommit( last_h, a:branchname)
 	else
 		echohl Error
