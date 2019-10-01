@@ -31,8 +31,21 @@ function! tanikawa#redmine#GetRedmineIssueDescription(issue_id)
 
 	call setline('.', split(l:text["issue"]["description"], '\r\%x0'))
 	setlocal filetype=redmine
-	nnoremap <silent><buffer> <C-C> :%y*<CR>
+	setlocal buftype=acwrite
+	exec "file" 'Ticket \#'.a:issue_id
+	nnoremap <silent><buffer> <C-C> :call <SID>CopyAllLine()<CR>
+	autocmd BufWriteCmd,FileWriteCmd,FileAppendCmd <buffer> call <SID>CopyAllLine()
 
+endfunction
+
+function! s:CopyAllLine()
+	let cur_pos = getpos(".")
+	call cursor(line("$"), 1)
+	let last_line = search('^\s*\S', 'bc')
+	let lines = getline(1, last_line)
+	let @* = join(lines, "\n")
+
+	let &mod = 0
 endfunction
 
 function! tanikawa#redmine#MakeRedmineDiffBranch( branchname )
