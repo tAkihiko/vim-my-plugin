@@ -36,6 +36,8 @@ endfunction
 
 function! s:MakeTags_VBA()
 	echo "VBA"
+	let cmd = 'ctags --jcode=sjis --languages=Basic --langmap=Basic:.vb --fields=+imaSz -f vba.tags -R .'
+	call system(cmd)
 endfunction
 
 function! s:MakeTags_All()
