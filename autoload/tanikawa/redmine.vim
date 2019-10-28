@@ -54,7 +54,10 @@ function! tanikawa#redmine#MakeRedmineDiffBranch( branchname )
 	let last = s:GitCommand( 'log --pretty=%H -1 '.last.'^^' )	" 本当は ^ で、Windows 上で ^ とするため ^^ としている
 	if last =~? '^\x\{1,40}$'
 		let last_h = s:GitCommand('rev-parse '.last)
-		call tanikawa#redmine#MakeRedmineDiffCommit( last_h, a:branchname)
+		let redmine_diff_commit = tanikawa#redmine#MakeRedmineDiffCommit( last_h, a:branchname)
+		let @*  = "　ブランチ： @" . a:branchname . "@"
+		let @* .= "\n"
+		let @* .= "　リビジョン： " . redmine_diff_commit
 	else
 		echohl Error
 		echo last
@@ -87,7 +90,8 @@ function! tanikawa#redmine#MakeRedmineDiffCommit( ... )
 	let l:a_h = s:GitCommand('rev-parse ' . l:a)
 	let l:b_h = s:GitCommand('rev-parse ' . l:b)
 
-	let @* = 'commit:' . l:a_sh . ' .. commit:' . l:b_sh . '  ( "差分":' . g:redmine_url_base . '/projects/' . g:redmine_project_id . '/repository/diff?rev='.l:b_h.'&rev_to='.l:a_h.' )'
+	let l:result = 'commit:' . l:a_sh . ' .. commit:' . l:b_sh . '  ( "差分":' . g:redmine_url_base . '/projects/' . g:redmine_project_id . '/repository/diff?rev='.l:b_h.'&rev_to='.l:a_h.' )'
+	return l:result
 endfunction
 
 function! tanikawa#redmine#GetRedmineGitBranch(ArgLead, CmdLine, CursorPos)
