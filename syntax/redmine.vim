@@ -7,6 +7,9 @@ endif
 
 runtime! syntax/textile.vim
 
+" 上書き
+syn match txtEmphasis    /_\.\@![^_]\+_\.\@!/
+
 syntax sync minlines=100
 
 syntax region rmCodeBlock start='<pre>' end='</pre>'
