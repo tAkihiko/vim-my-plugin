@@ -9,7 +9,7 @@ runtime! syntax/textile.vim
 
 " 上書き
 syn clear txtEmphasis
-syn match txtEmphasis /_\.\@![^_.][^_]*_\.\@!/
+syn match txtEmphasis /|\@<!_[^_]*|\@<!_/
 
 syntax sync minlines=100
 
