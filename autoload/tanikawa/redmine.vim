@@ -38,6 +38,30 @@ function! tanikawa#redmine#GetRedmineIssueDescription(issue_id)
 
 endfunction
 
+function! tanikawa#redmine#GetRedmineIssueURLandTitle(issue_id)
+	if !exists("g:redmine_url_base") || len( g:redmine_url_base ) <= 0
+		echoerr "Redmineの URL を登録してください。"
+		return
+	endif
+	if !exists("g:redmine_api_key") || len( g:redmine_api_key ) <= 0
+		echoerr "Redmineの API KEY を登録してください。"
+		return
+	endif
+
+	let params = {
+				\ "url": g:redmine_url_base . '/issues/' . a:issue_id . '.json', 
+				\ "headers" : {"X-Redmine-API-Key": g:redmine_api_key},
+				\ }
+	let l:json = s:WebHttp.request(params)["content"]
+	let l:text = s:WebJson.decode(l:json)
+
+	let l:url =g:redmine_url_base . '/issues/' . a:issue_id
+	let l:title = l:text["issue"]["subject"]
+	let l:outputs = [ l:url, l:title ]
+	let @* = join(l:outputs, "\n")
+
+endfunction
+
 function! s:CopyAllLine()
 	let cur_pos = getpos(".")
 	call cursor(line("$"), 1)
