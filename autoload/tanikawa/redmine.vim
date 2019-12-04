@@ -44,6 +44,7 @@ function! s:CopyAllLine()
 	let last_line = search('^\s*\S', 'bc')
 	let lines = getline(1, last_line)
 	let @* = join(lines, "\n")
+	call setpos(".", cur_pos)
 
 	let &mod = 0
 endfunction
