@@ -32,7 +32,7 @@ function! tanikawa#redmine#GetRedmineIssueDescription(issue_id)
 	call setline('.', split(l:text["issue"]["description"], '\r\%x0'))
 	setlocal filetype=redmine
 	setlocal buftype=acwrite
-	exec "file" 'Ticket \#'.a:issue_id
+	exec "file" 'Ticket \#'.a:issue_id.' '.fnameescape(l:text["issue"]["subject"])
 	nnoremap <silent><buffer> <C-C> :call <SID>CopyAllLine()<CR>
 	autocmd BufWriteCmd,FileWriteCmd,FileAppendCmd <buffer> call <SID>CopyAllLine()
 
@@ -73,10 +73,14 @@ function! s:CopyAllLine()
 	let &mod = 0
 endfunction
 
-function! tanikawa#redmine#MakeRedmineDiffBranch( branchname )
+function! tanikawa#redmine#MakeRedmineDiffBranch( branchname, mergebase )
 	let l:base_branch = get(g:, 'redmine_base_branch', 'HEAD')
-	let last = s:GitCommandList( 'log --pretty=%H --first-parent '.l:base_branch.'..'.a:branchname )[-1]
-	let last = s:GitCommand( 'log --pretty=%H -1 '.last.'^^' )	" 本当は ^ で、Windows 上で ^ とするため ^^ としている
+	if a:mergebase > 0
+		let last = s:GitCommandList( 'show-branch --merge-base '.l:base_branch.' '.a:branchname )[-1]
+	else
+		let last = s:GitCommandList( 'log --pretty=%H --first-parent '.l:base_branch.'..'.a:branchname )[-1]
+		let last = s:GitCommand( 'log --pretty=%H -1 '.last.'^^' )	" 本当は ^ で、Windows 上で ^ とするため ^^ としている
+	endif
 	if last =~? '^\x\{1,40}$'
 		let last_h = s:GitCommand('rev-parse '.last)
 		let redmine_diff_commit = tanikawa#redmine#MakeRedmineDiffCommit( last_h, a:branchname)
