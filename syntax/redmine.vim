@@ -17,9 +17,11 @@ syntax region rmCodeBlock start='<pre>' end='</pre>'
 
 syntax match rmTicketNo /#\d\+/
 syntax match rmCommitHash /commit:\x\{1,40}/
+syntax match rmPicture /![^!]*!/
 
 highlight link rmCodeBlock txtCode
 highlight link rmTicketNo Special
 highlight link rmCommitHash Special
+highlight link rmPicture Identifier
 
 let b:current_syntax = "weekly_report"
