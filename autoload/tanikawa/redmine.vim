@@ -56,7 +56,7 @@ function! tanikawa#redmine#GetRedmineIssueURLandTitle(issue_id)
 	let l:text = s:WebJson.decode(l:json)
 
 	let l:url =g:redmine_url_base . '/issues/' . a:issue_id
-	let l:title = l:text["issue"]["subject"]
+	let l:title = '#' . a:issue_id . ' ' . l:text["issue"]["subject"]
 	let l:outputs = [ l:url, l:title ]
 	let @* = join(l:outputs, "\n")
 
