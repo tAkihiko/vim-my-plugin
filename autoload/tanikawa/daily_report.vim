@@ -26,26 +26,39 @@ function! tanikawa#daily_report#MkDailyReport(title) abort
 
 endfunction
 
-function! tanikawa#daily_report#StartWork(start_time="") abort
+function! tanikawa#daily_report#StartWork(...) abort
 	let l:month = str2nr(strftime('%m'))
 	let l:day = str2nr(strftime('%d'))
 	let l:today = printf("%d/%d(%s)", l:month, l:day, strftime('%a'))
 	let l:time_step = 5
 
+	let l:hour = -1
+	let l:min = -1
 	let l:auto_adjust = v:false
-	if a:start_time =~? '^\d\{1,2}:\d\{2}$'
-		let [l:hour, l:min; l:rest] = split(a:start_time, ':', 1)
-	elseif a:start_time =~? '^\d\{3,4}$'
-		let l:hour = a:start_time[0:-3]
-		let l:min = a:start_time[-2:-1]
-	else
+	for l:arg_str in a:000
+
+		if l:arg_str =~? '^\d\{1,2}:\d\{2}$'
+			" 8:00, 10:30
+			let [l:hour, l:min; l:rest] = split(l:arg_str, ':', 1)
+			let l:hour = str2nr(l:hour)
+			let l:min = str2nr(l:min)
+
+		elseif l:arg_str =~? '^\d\{3,4}$'
+			" 800, 1030
+			let l:hour = str2nr(l:arg_str[0:-3])
+			let l:min = str2nr(l:arg_str[-2:-1])
+
+		else
+			" nop
+		endif
+	endfor
+
+	" 指定無ければ現在の時間を基準にする
+	if l:hour < 0 || l:min < 0
 		let l:hour = strftime('%H')
 		let l:min = strftime('%M')
 		let l:auto_adjust = v:true
 	endif
-
-	let l:hour = str2nr(l:hour)
-	let l:min = str2nr(l:min)
 
 	let l:start_time = l:hour*60 + l:min
 	if l:auto_adjust

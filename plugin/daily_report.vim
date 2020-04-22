@@ -2,7 +2,7 @@ scriptencoding utf-8
 " Author: 谷川陽彦 <pureodio1109@gmail.com>
 
 command! -complete=customlist,<SID>CompDailyReport -nargs=? MkDailyReport call tanikawa#daily_report#MkDailyReport(<q-args>)
-command! -nargs=? StartWork call tanikawa#daily_report#StartWork(<f-args>)
+command! -nargs=* StartWork call tanikawa#daily_report#StartWork(<f-args>)
 
 function! s:CompDailyReport( arglead, cmdline, curpos )
 	if exists("g:daily_report_dir")
