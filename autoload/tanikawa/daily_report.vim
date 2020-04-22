@@ -50,9 +50,10 @@ function! tanikawa#daily_report#StartWork(...) abort
 			let l:hour = str2nr(l:arg_str[0:-3])
 			let l:min = str2nr(l:arg_str[-2:-1])
 
-		elseif l:arg_str =~? '^\d\{1,2}h\?$'
-			" 4, 9, 4h, 10h
-			let l:work_time = str2nr(l:arg_str) * 60
+		elseif l:arg_str =~? '^\%(\d\{1,2}\%(\.\d\{1,}\)\?\|\.\d\{1,}\)h\?$'
+			" 4.5, 9, 3.5h, 10h
+			let l:work_time_str = substitute( l:arg_str, 'h', '', 'g') " 「h」を除去
+			let l:work_time = float2nr(str2float(l:work_time_str) * 60.0 + 0.5)
 
 		else
 			" nop
