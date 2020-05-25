@@ -98,6 +98,32 @@ function! tanikawa#daily_report#StartWork(...) abort
 
 endfunction
 
+function! tanikawa#daily_report#StartWork2() abort
+	let l:today = strftime('%Y/%m/%d')
+
+	" ファイルの開き方を設定
+	if exists('g:tanikawa_daily_report_start_work_opener') && len(g:tanikawa_daily_report_start_work_opener) > 0
+		let edit_cmd = g:tanikawa_daily_report_start_work_opener
+	else
+		let edit_cmd = 'new'
+	endif
+	if expand('%') == "" && &mod == 0 && &bt == ""
+		" そのまま実行
+	else
+		exec 'silent' edit_cmd
+	endif
+
+	setlocal bt=nofile
+
+	call append(line('$'), printf("テレワーク %s", l:today))
+
+	0 delete _
+
+	command! -buffer CopyStartWorkStr call <SID>CopyStartWorkStr()
+	nnoremap <buffer><silent> <C-C> :<C-U>CopyStartWorkStr<CR>
+
+endfunction
+
 function! s:CopyStartWorkStr() abort
 	% yank *
 	let @* = substitute(@*, "\n\s*$", "", "")
