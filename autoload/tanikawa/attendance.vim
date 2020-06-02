@@ -10,6 +10,7 @@ function! tanikawa#attendance#AttendanceReport(...) abort
 	let l:month = str2nr(strftime('%m'))
 	let l:day = str2nr(strftime('%d'))
 	let l:rest_type = 0 " 0:all, 1:am, 2:pm
+	let l:today = s:DateTime.from_date(l:year, l:month, l:day)
 
 	for l:arg_str in a:000
 
@@ -47,6 +48,13 @@ function! tanikawa#attendance#AttendanceReport(...) abort
 	let l:datetime = s:DateTime.from_date(l:year, l:month, l:day)
 	let l:date_str = printf( "%d/%d (%s)", l:month, l:day, l:datetime.strftime("%a"))
 
+	" 今日と比較
+	if l:datetime.is(l:today)
+		let l:report_type = "当日不在連絡"
+	else
+		let l:report_type = "不在連絡"
+	endif
+
 	" 休みの種別文字列を作成
 	if l:rest_type == 1
 		let l:vacation = "午前休"
@@ -71,8 +79,9 @@ function! tanikawa#attendance#AttendanceReport(...) abort
 
 	setlocal bt=nofile
 
+	" 文字列作成
 	"call append(line('$'), '私用の為')
-	call append(line('$'), printf("【不在連絡】谷川：%s %s", l:date_str, l:vacation))
+	call append(line('$'), printf("【%s】谷川：%s %s", l:report_type, l:date_str, l:vacation))
 
 	0 delete _
 
