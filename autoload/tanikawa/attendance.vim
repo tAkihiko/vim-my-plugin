@@ -45,7 +45,7 @@ function! tanikawa#attendance#AttendanceReport(...) abort
 
 	" 日付文字列を作成
 	let l:datetime = s:DateTime.from_date(l:year, l:month, l:day)
-	let l:date = printf( "%d/%d (%s)", l:month, l:day, l:datetime.strftime("%a"))
+	let l:date_str = printf( "%d/%d (%s)", l:month, l:day, l:datetime.strftime("%a"))
 
 	" 休みの種別文字列を作成
 	if l:rest_type == 1
@@ -72,7 +72,7 @@ function! tanikawa#attendance#AttendanceReport(...) abort
 	setlocal bt=nofile
 
 	"call append(line('$'), '私用の為')
-	call append(line('$'), printf("【不在連絡】谷川：%s %s", l:date, l:vacation))
+	call append(line('$'), printf("【不在連絡】谷川：%s %s", l:date_str, l:vacation))
 
 	0 delete _
 
