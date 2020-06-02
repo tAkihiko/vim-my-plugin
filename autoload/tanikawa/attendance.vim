@@ -9,7 +9,7 @@ function! tanikawa#attendance#AttendanceReport(...) abort
 	let l:year = str2nr(strftime('%Y'))
 	let l:month = str2nr(strftime('%m'))
 	let l:day = str2nr(strftime('%d'))
-	let l:type = 0 " 0:all, 1:am, 2:pm
+	let l:rest_type = 0 " 0:all, 1:am, 2:pm
 
 	for l:arg_str in a:000
 
@@ -32,11 +32,11 @@ function! tanikawa#attendance#AttendanceReport(...) abort
 
 		elseif l:arg_str =~? '^\%(am\)$'
 			" am
-			let l:type = 1
+			let l:rest_type = 1
 
 		elseif l:arg_str =~? '^\%(pm\)$'
 			" pm
-			let l:type = 2
+			let l:rest_type = 2
 
 		else
 			" nop
@@ -48,9 +48,9 @@ function! tanikawa#attendance#AttendanceReport(...) abort
 	let l:date = printf( "%d/%d (%s)", l:month, l:day, l:datetime.strftime("%a"))
 
 	" 休みの種別文字列を作成
-	if l:type == 1
+	if l:rest_type == 1
 		let l:vacation = "午前休"
-	elseif l:type == 2
+	elseif l:rest_type == 2
 		let l:vacation = "午後休"
 	else
 		let l:vacation = "全日休"
