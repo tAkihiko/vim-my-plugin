@@ -121,7 +121,7 @@ function! tanikawa#weekly_report#Copy() abort
 endfunction
 
 " 作業時間を加算
-function! tanikawa#weekly_report#AddWorkingTime( time )
+function! tanikawa#weekly_report#CalcWorkingTime(time, mode)
 
 	let WEEKLY_REPORT_WORKTIME_PATTERN = '^\(.*\t\)\(\d\+:\d\+\)'
 
@@ -131,13 +131,20 @@ function! tanikawa#weekly_report#AddWorkingTime( time )
 	endif
 	let cur_time = substitute(line, WEEKLY_REPORT_WORKTIME_PATTERN, '\2', '')
 
+	" 現在書かれている時間を取得
 	let [l:hour, l:min] = map(split(cur_time, ":", 1), {key, val -> str2nr(val)})
+	let l:total_min = l:hour * 60 + l:min
 
+	" 指定した時間を取得
+	let l:hour_diff = 0
+	let l:min_diff = 0
+	let l:total_min_diff = 0
 	if a:time =~? '^\d*:\d*$'
 		" 1:30, :45
-		let [l:hour, l:min] += map(split(a:time, ":", 1), {key, val -> str2nr(val)})
+		let [l:hour_diff, l:min_diff] = map(split(a:time, ":", 1), {key, val -> str2nr(val)})
+		let l:total_min_diff = l:hour_diff * 60 + l:min_diff
 	elseif a:time =~? '^\d\+$'
-		let l:min += str2nr(a:time)
+		let l:total_min_diff = str2nr(a:time)
 	else
 		echohl Error
 		echo "引数は HH:MM / HH: / MM 形式です"
@@ -145,8 +152,19 @@ function! tanikawa#weekly_report#AddWorkingTime( time )
 		return
 	endif
 
-	let l:hour += l:min / 60
-	let l:min   = l:min % 60
+	" 計算を切替
+	if a:mode == 0
+		let l:total_min += l:total_min_diff
+	elseif a:mode == 1
+		let l:total_min -= l:total_min_diff
+	elseif a:mode == 2
+		let l:total_min = l:total_min_diff
+	else
+		" nop
+	endif
+
+	let l:hour = l:total_min / 60
+	let l:min = l:total_min % 60
 
 	let next_line = substitute(line, WEEKLY_REPORT_WORKTIME_PATTERN, '\1'.printf("%d:%02d", l:hour, l:min), '')
 
