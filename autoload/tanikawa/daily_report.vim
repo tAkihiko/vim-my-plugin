@@ -36,19 +36,38 @@ function! tanikawa#daily_report#StartWork(...) abort
 	let l:min = -1
 	let l:auto_adjust = v:false
 	let l:work_time = 9*60 " 8時間労働 + 1時間休憩
+	let l:has_end_time = v:false
+	let l:hour_e = -1
+	let l:min_e = -1
+	let l:time_cnt = 0
 
 	for l:arg_str in a:000
 
 		if l:arg_str =~? '^\d\{1,2}:\d\{2}$'
 			" 8:00, 10:30
-			let [l:hour, l:min; l:rest] = split(l:arg_str, ':', 1)
-			let l:hour = str2nr(l:hour)
-			let l:min = str2nr(l:min)
+			if l:time_cnt == 0
+				let [l:hour, l:min; l:rest] = split(l:arg_str, ':', 1)
+				let l:hour = str2nr(l:hour)
+				let l:min = str2nr(l:min)
+			else
+				let l:has_end_time = v:true
+				let [l:hour_e, l:min_e; l:rest] = split(l:arg_str, ':', 1)
+				let l:hour_e = str2nr(l:hour_e)
+				let l:min_e = str2nr(l:min_e)
+			endif
+			let l:time_cnt += 1
 
 		elseif l:arg_str =~? '^\d\{3,4}$'
 			" 800, 1030
-			let l:hour = str2nr(l:arg_str[0:-3])
-			let l:min = str2nr(l:arg_str[-2:-1])
+			if l:time_cnt == 0
+				let l:hour = str2nr(l:arg_str[0:-3])
+				let l:min = str2nr(l:arg_str[-2:-1])
+			else
+				let l:has_end_time = v:true
+				let l:hour_e = str2nr(l:arg_str[0:-3])
+				let l:min_e = str2nr(l:arg_str[-2:-1])
+			endif
+			let l:time_cnt += 1
 
 		elseif l:arg_str =~? '^\%(\d\{1,2}\%(\.\d\{1,}\)\?\|\.\d\{1,}\)h\?$'
 			" 4.5, 9, 3.5h, 10h
@@ -68,11 +87,15 @@ function! tanikawa#daily_report#StartWork(...) abort
 	endif
 
 	let l:start_time = l:hour*60 + l:min
-	if l:auto_adjust
-		" 時間をキリの良く調整
-		let l:start_time += l:time_step - l:start_time % l:time_step
+	if l:has_end_time
+		let l:end_time = l:hour_e*60 + l:min_e
+	else
+		if l:auto_adjust
+			" 時間をキリの良く調整
+			let l:start_time += l:time_step - l:start_time % l:time_step
+		endif
+		let l:end_time = l:start_time + l:work_time
 	endif
-	let l:end_time = l:start_time + l:work_time
 
 	" ファイルの開き方を設定
 	if exists('g:tanikawa_daily_report_start_work_opener') && len(g:tanikawa_daily_report_start_work_opener) > 0
