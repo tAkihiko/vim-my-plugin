@@ -122,7 +122,7 @@ function! tanikawa#daily_report#StartWork(...) abort
 endfunction
 
 function! tanikawa#daily_report#StartWork2() abort
-	let l:today = strftime('%Y/%m/%d')
+	let l:today = strftime('%Y/%m/%d （%a）')
 
 	" ファイルの開き方を設定
 	if exists('g:tanikawa_daily_report_start_work_opener') && len(g:tanikawa_daily_report_start_work_opener) > 0
