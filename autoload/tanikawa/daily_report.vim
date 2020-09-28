@@ -133,8 +133,42 @@ function! tanikawa#daily_report#StartWork(...) abort
 
 endfunction
 
-function! tanikawa#daily_report#StartWork2() abort
+function! tanikawa#daily_report#StartWork2(...) abort
+
+	" 今日の日付を取得
 	let l:today = strftime('%Y/%m/%d （%a）')
+
+	" 勤務場所を設定
+	let l:place = "在宅"
+	if exists('g:work_place') && type(g:work_place) == v:t_string && len(g:work_place) > 0
+		let l:place = g:work_place
+	endif
+
+	" 業務開始時刻を設定
+	let l:hour = 7
+	let l:min = 30
+
+	" 引数チェック
+	for l:arg_str in a:000
+
+		if l:arg_str =~? '^\d\{1,2}:\d\{2}$'
+			" 勤務開始時刻
+			" 8:00, 10:30
+			let [l:hour, l:min; l:rest] = split(l:arg_str, ':', 1)
+			let l:hour = str2nr(l:hour)
+			let l:min = str2nr(l:min)
+
+		elseif l:arg_str =~? '^\d\{3,4}$'
+			" 勤務開始時刻
+			" 800, 1030
+			let l:hour = str2nr(l:arg_str[0:-3])
+			let l:min = str2nr(l:arg_str[-2:-1])
+
+		else
+			" nop
+		endif
+
+	endfor
 
 	" ファイルの開き方を設定
 	if exists('g:tanikawa_daily_report_start_work_opener') && len(g:tanikawa_daily_report_start_work_opener) > 0
@@ -151,11 +185,12 @@ function! tanikawa#daily_report#StartWork2() abort
 	setlocal bt=nofile
 
 	call append(line('$'), printf("テレワーク %s", l:today))
+	call append(line('$'), printf("%s %d:%02d ～ ", l:place, l:hour, l:min))
 
 	0 delete _
 
 	command! -buffer CopyStartWorkStr call <SID>CopyStartWorkStr()
-	nnoremap <buffer><silent> <C-C> :<C-U>CopyStartWorkStr<CR>
+	nnoremap <buffer><silent> <C-C> 0"*yg_j
 
 endfunction
 

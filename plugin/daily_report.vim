@@ -3,7 +3,7 @@ scriptencoding utf-8
 
 command! -complete=customlist,<SID>CompDailyReport -nargs=? MkDailyReport call tanikawa#daily_report#MkDailyReport(<q-args>)
 command! -nargs=* StartWork call tanikawa#daily_report#StartWork(<f-args>)
-command! StartWork2 call tanikawa#daily_report#StartWork2()
+command! -nargs=1 StartWork2 call tanikawa#daily_report#StartWork2(<f-args>)
 
 function! s:CompDailyReport( arglead, cmdline, curpos )
 	if exists("g:daily_report_dir")
