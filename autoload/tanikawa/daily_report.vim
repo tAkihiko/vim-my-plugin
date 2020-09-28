@@ -1,6 +1,9 @@
 scriptencoding utf-8
 " Author: 谷川陽彦 <pureodio1109@gmail.com>
 
+let s:V = vital#_tanikawa#new()
+let s:DateTime = s:V.import('DateTime')
+
 function! tanikawa#daily_report#MkDailyReport(title) abort
 	if exists("g:daily_report_dir")
 		let l:daily_report_dir = g:daily_report_dir
@@ -97,6 +100,15 @@ function! tanikawa#daily_report#StartWork(...) abort
 		let l:end_time = l:start_time + l:work_time
 	endif
 
+	" 時間が過ぎていたら文章を変える
+	let l:time_now = s:DateTime.now()
+	let l:time_target = s:DateTime.from_date(l:time_now.year(),l:time_now.month(),l:time_now.day(),l:start_time/60,l:start_time%60)
+	if l:time_now.compare(l:time_target) > 0
+		let l:text = "連絡が遅れましたが、業務を開始しています。"
+	else
+		let l:text = "業務を開始します。"
+	endif
+
 	" ファイルの開き方を設定
 	if exists('g:tanikawa_daily_report_start_work_opener') && len(g:tanikawa_daily_report_start_work_opener) > 0
 		let edit_cmd = g:tanikawa_daily_report_start_work_opener
@@ -111,7 +123,7 @@ function! tanikawa#daily_report#StartWork(...) abort
 
 	setlocal bt=nofile
 
-	call append(line('$'), '業務を開始します。')
+	call append(line('$'), l:text)
 	call append(line('$'), printf("%s %d:%02d-%d:%02d 在宅勤務(谷川)", l:today, l:start_time/60, l:start_time%60, l:end_time/60, l:end_time%60))
 
 	0 delete _
