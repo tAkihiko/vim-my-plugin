@@ -10,12 +10,16 @@ function! s:CompWeeklyReport( arglead, cmdline, curpos )
 		let l:weekly_report_dir = "."
 	endif
 
-	if has('win32') || has('win64')
-		let cmd = 'dir /b '.l:weekly_report_dir.'\*.txt'
+	if exists('?readdir')
+		let text_list = readdir(l:weekly_report_dir, {n -> n=~ '\.wr\.txt$'})
 	else
-		let cmd = 'ls '.l:weekly_report_dir.'/*.txt'
+		if has('win32') || has('win64')
+			let cmd = 'dir /b '.l:weekly_report_dir.'\*.txt'
+		else
+			let cmd = 'ls '.l:weekly_report_dir.'/*.txt'
+		endif
+		let text_list = systemlist(cmd)
 	endif
-	let text_list = systemlist(cmd)
 	call map(text_list, {key, val -> substitute(val, '\r', '', 'g') })
 	call map(text_list, {key, val -> substitute(val, '^\%(.*[\/]\)\?\(\d\+\)\.wr\.txt$', '\1', 'g') })
 
