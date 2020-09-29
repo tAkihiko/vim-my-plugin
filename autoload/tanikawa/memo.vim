@@ -8,14 +8,21 @@ function! tanikawa#memo#MkMemo(title) abort
 		let l:memo_dir = "."
 	endif
 
+	if exists('?readdir')
+		let text_list = readdir(l:weekly_report_dir, {n -> n=~ '\.txt$'})
+	else
+		if has('win32') || has('win64')
+			let cmd = 'dir /b '.shellescape(l:memo_dir.'\*.txt')
+		else
+			let cmd = 'ls '.shellescape(l:memo_dir.'/*.txt')
+		endif
+		let text_list = systemlist(cmd)
+	endif
 	if has('win32') || has('win64')
-		let cmd = 'dir /b '.shellescape(l:memo_dir.'\*.txt')
 		let enc = 'sjis'
 	else
-		let cmd = 'ls '.shellescape(l:memo_dir.'/*.txt')
 		let enc = 'utf-8'
 	endif
-	let text_list = systemlist(cmd)
 	call map(text_list, {key, val -> iconv(val, enc, &enc) })
 	call map(text_list, {key, val -> substitute(val, '\r', '', 'g') })
 	call map(text_list, {key, val -> substitute(val, '^\%(.*[\/]\)\?\(\d\{2}_[^\/]*\.txt\)$', '\1', 'g') })
