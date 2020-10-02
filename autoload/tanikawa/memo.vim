@@ -9,7 +9,8 @@ function! tanikawa#memo#MkMemo(title) abort
 	endif
 
 	if exists('?readdir')
-		let text_list = readdir(l:weekly_report_dir, {n -> n=~ '\.txt$'})
+		let text_list = readdir(l:memo_dir, {n -> n=~ '^\d\{2}_.*\.txt$'})
+		let cnt = len(text_list)
 	else
 		if has('win32') || has('win64')
 			let cmd = 'dir /b '.shellescape(l:memo_dir.'\*.txt')
@@ -17,22 +18,21 @@ function! tanikawa#memo#MkMemo(title) abort
 			let cmd = 'ls '.shellescape(l:memo_dir.'/*.txt')
 		endif
 		let text_list = systemlist(cmd)
-	endif
-	if has('win32') || has('win64')
-		let enc = 'sjis'
-	else
-		let enc = 'utf-8'
-	endif
-	call map(text_list, {key, val -> iconv(val, enc, &enc) })
-	call map(text_list, {key, val -> substitute(val, '\r', '', 'g') })
-	call map(text_list, {key, val -> substitute(val, '^\%(.*[\/]\)\?\(\d\{2}_[^\/]*\.txt\)$', '\1', 'g') })
-
-	let cnt = 0
-	for memo in text_list
-		if memo =~? '^\d\{2}_.*\.txt'
-			let cnt += 1
+		if has('win32') || has('win64')
+			let enc = 'sjis'
+		else
+			let enc = 'utf-8'
 		endif
-	endfor
+		call map(text_list, {key, val -> iconv(val, enc, &enc) })
+		call map(text_list, {key, val -> substitute(val, '\r', '', 'g') })
+		call map(text_list, {key, val -> substitute(val, '^\%(.*[\/]\)\?\(\d\{2}_[^\/]*\.txt\)$', '\1', 'g') })
+		let cnt = 0
+		for memo in text_list
+			if memo =~? '^\d\{2}_.*\.txt'
+				let cnt += 1
+			endif
+		endfor
+	endif
 
 	if 0 < len(a:title)
 		let title = a:title
@@ -64,24 +64,28 @@ function! tanikawa#memo#EdMemo(preview_mode, title_no) abort
 		let l:memo_dir = "."
 	endif
 
-	if has('win32') || has('win64')
-		let cmd = 'dir /b '.shellescape(l:memo_dir.'\*.txt')
-		let enc = 'sjis'
+	if exists('?readdir')
+		let memo_list = readdir(l:memo_dir, {n -> n=~ '^\d\{2}_.*\.txt$'})
 	else
-		let cmd = 'ls '.shellescape(l:memo_dir.'/*.txt')
-		let enc = 'utf-8'
-	endif
-	let text_list = systemlist(cmd)
-	call map(text_list, {key, val -> iconv(val, enc, &enc) })
-	call map(text_list, {key, val -> substitute(val, '\r', '', 'g') })
-	call map(text_list, {key, val -> substitute(val, '^\%(.*[\/]\)\?\(\d\{2}_[^\/]*\.txt\)$', '\1', 'g') })
-
-	let memo_list = []
-	for memo in text_list
-		if memo =~? '^\d\{2}_.*\.txt$'
-			call add(memo_list, memo)
+		if has('win32') || has('win64')
+			let cmd = 'dir /b '.shellescape(l:memo_dir.'\*.txt')
+			let enc = 'sjis'
+		else
+			let cmd = 'ls '.shellescape(l:memo_dir.'/*.txt')
+			let enc = 'utf-8'
 		endif
-	endfor
+		let text_list = systemlist(cmd)
+		call map(text_list, {key, val -> iconv(val, enc, &enc) })
+		call map(text_list, {key, val -> substitute(val, '\r', '', 'g') })
+		call map(text_list, {key, val -> substitute(val, '^\%(.*[\/]\)\?\(\d\{2}_[^\/]*\.txt\)$', '\1', 'g') })
+
+		let memo_list = []
+		for memo in text_list
+			if memo =~? '^\d\{2}_.*\.txt$'
+				call add(memo_list, memo)
+			endif
+		endfor
+	endif
 
 	if 0 < len(a:title_no)
 		"
