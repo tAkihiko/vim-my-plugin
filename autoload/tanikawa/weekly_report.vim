@@ -32,9 +32,12 @@ function! tanikawa#weekly_report#MkWeeklyReport(title) abort
 		let title = strftime('%Y%m%d')
 	endif
 
-	if has('win32') || has('win64')
-		" executable('dir')が機能しない……
+	if exists('?readdir')
+		let weekly_reports = readdir(l:weekly_report_dir, {e -> e =~ '\.wr\.txt$'})
+		let zenkai = weekly_reports[-1]
 
+	elseif has('win32') || has('win64')
+		" executable('dir')が機能しない……
 		let weekly_reports = systemlist('dir /b /a:-d ' . shellescape(l:weekly_report_dir))
 		call filter(weekly_reports, 'v:val =~? "^\\d\\+"')
 		if 0 < len(weekly_reports)
