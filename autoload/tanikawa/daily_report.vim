@@ -145,8 +145,8 @@ function! tanikawa#daily_report#StartWork2(...) abort
 	endif
 
 	" 業務開始時刻を設定
-	let l:hour = 7
-	let l:min = 30
+	let l:hour = -1
+	let l:min = -1
 	if exists('g:work_start_time_default')
 		if type(g:work_start_time_default) == v:t_list && len(g:work_start_time_default) >= 2
 			let [l:hour, l:min; l:rest] = g:work_start_time_default
@@ -174,6 +174,19 @@ function! tanikawa#daily_report#StartWork2(...) abort
 		endif
 
 	endfor
+
+	" 指定無ければ現在の時間を基準にする
+	let l:time_step = 5
+	if l:hour < 0 || l:min < 0
+		let l:hour = strftime('%H')
+		let l:min = strftime('%M')
+
+		" 時間をキリの良く調整
+		let l:time = l:hour*60 + l:min
+		let l:time += l:time_step - l:time % l:time_step
+		let l:hour = l:time/60
+		let l:min  = l:time%60
+	endif
 
 	" ファイルの開き方を設定
 	if exists('g:tanikawa_daily_report_start_work_opener') && len(g:tanikawa_daily_report_start_work_opener) > 0
