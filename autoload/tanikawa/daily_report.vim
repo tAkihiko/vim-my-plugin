@@ -44,6 +44,14 @@ function! tanikawa#daily_report#StartWork(...) abort
 	let l:min_e = -1
 	let l:time_cnt = 0
 
+	" 業務開始時刻を設定
+	if exists('g:work_start_time_default')
+		if type(g:work_start_time_default) == v:t_list && len(g:work_start_time_default) >= 2
+			let [l:hour, l:min; l:rest] = g:work_start_time_default
+		endif
+	endif
+
+	" 引数チェック
 	for l:arg_str in a:000
 
 		if l:arg_str =~? '^\d\{1,2}:\d\{2}$'
