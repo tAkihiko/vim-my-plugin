@@ -136,7 +136,7 @@ function! tanikawa#daily_report#StartWork(...) abort
 
 	0 delete _
 
-	command! -buffer CopyStartWorkStr call <SID>CopyStartWorkStr()
+	command! -buffer -range=% CopyStartWorkStr call <SID>CopyStartWorkStr(<line1>,<line2>)
 	nnoremap <buffer><silent> <C-C> :<C-U>CopyStartWorkStr<CR>
 
 endfunction
@@ -215,12 +215,12 @@ function! tanikawa#daily_report#StartWork2(...) abort
 
 	0 delete _
 
-	command! -buffer CopyStartWorkStr call <SID>CopyStartWorkStr()
-	nnoremap <buffer><silent> <C-C> 0"*yg_j
+	command! -buffer -range CopyStartWorkStr call <SID>CopyStartWorkStr(<line1>,<line2>)
+	nnoremap <buffer><silent> <C-C> :<C-U>CopyStartWorkStr<CR>j
 
 endfunction
 
-function! s:CopyStartWorkStr() abort
-	% yank *
+function! s:CopyStartWorkStr(begin, end) abort
+	exec a:begin . "," . a:end "yank *"
 	let @* = substitute(@*, "\n\s*$", "", "")
 endfunction
