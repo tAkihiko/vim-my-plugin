@@ -1,0 +1,18 @@
+scriptencoding utf-8
+" Author: 谷川陽彦 <pureodio1109@gmail.com>
+
+function! tanikawa#util#DeleteConsecutiveDuplicateLines(begin,end) abort
+	let lines = getline(a:begin, a:end)
+
+	let outlines = []
+	let prev = ""
+	for line in lines
+		if line ==# prev
+			let outlines += [""]
+		else
+			let outlines += [line]
+		endif
+		let prev = line
+	endfor
+	call setline(a:begin, outlines)
+endfunction
