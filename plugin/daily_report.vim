@@ -1,9 +1,9 @@
 scriptencoding utf-8
 " Author: 谷川陽彦 <pureodio1109@gmail.com>
 
-command! -complete=customlist,<SID>CompDailyReport -nargs=? MkDailyReport call tanikawa#daily_report#MkDailyReport(<q-args>)
-command! -nargs=* StartWork call tanikawa#daily_report#StartWork(<f-args>)
-command! -nargs=? StartWork2 call tanikawa#daily_report#StartWork2(<f-args>)
+command! -complete=customlist,<SID>CompDailyReport -nargs=? DRMkDailyReport call tanikawa#daily_report#MkDailyReport(<q-args>)
+command! -nargs=* DRStartWork call tanikawa#daily_report#StartWork(<f-args>)
+command! -nargs=? DRStartWork2 call tanikawa#daily_report#StartWork2(<f-args>)
 
 function! s:CompDailyReport( arglead, cmdline, curpos )
 	if exists("g:daily_report_dir")
