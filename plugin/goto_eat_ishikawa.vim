@@ -11,6 +11,7 @@ command! -nargs=1 -complete=file GTEParseHttpFile call <SID>ParseGotoEatIshikawa
 command! -nargs=1 -complete=custom,<SID>ComplDateDir GTEParseHttpDir call <SID>ParseGotoEatIshikawaHttpDir(<q-args>)
 command! -nargs=1 -complete=customlist,<SID>ComplIshikawaCity GTEGetHtmlFiles call <SID>GetGotoEatHtmlFiles(<q-args>)
 command! GTEOpenDirectory call <SID>OpenDirecotry()
+command! GTECd call <SID>ChangeDirecotry()
 
 func! s:ParseGotoEatIshikawaHttpFile(filename)
 	let parsed = s:Xml.parseFile(a:filename).findAll({'class':'member_item'})
@@ -49,11 +50,7 @@ func! s:GetGotoEatHtmlFiles(city_name)
 
 	" 出力ディレクトリを作成
 	let output_dirname = strftime("%Y%m%d_%H%M")
-	if exists('g:tanikawa_gte_output_dirroot')
-		let output_dirroot = g:tanikawa_gte_output_dirroot
-	else
-		let output_dirroot = '.'
-	endif
+	let output_dirroot = s:GetOutputRootDir()
 	let output_dirpath = printf('%s/%02d_%s_%s', output_dirroot, city.pri, city.yomi[0], output_dirname)
 	call mkdir(output_dirpath)
 
@@ -83,16 +80,17 @@ func! s:GetGotoEatHtmlFiles(city_name)
 endfunc
 
 func! s:OpenDirecotry()
-	if exists('g:tanikawa_gte_output_dirroot')
-		let output_dirroot = g:tanikawa_gte_output_dirroot
-	else
-		let output_dirroot = '.'
-	endif
+	let output_dirroot = s:GetOutputRootDir()
 	if exists(':Exp')
 		exec 'Exp' output_dirroot
 	elseif exists(':Explore')
 		exec 'Explore' output_dirroot
 	endif
+endfunc
+
+func! s:ChangeDirecotry()
+	let output_dirroot = s:GetOutputRootDir()
+	exec 'cd' output_dirroot
 endfunc
 
 let s:city_list = {
@@ -133,6 +131,15 @@ endfunc
 
 func! s:ComplDateDir(ArgLead, CmdLine, CursorPos)
 	return join(reverse(readdir('.', {n->isdirectory(n)})), "\n")
+endfunc
+
+func! s:GetOutputRootDir()
+	if exists('g:tanikawa_gte_output_dirroot')
+		let output_dirroot = g:tanikawa_gte_output_dirroot
+	else
+		let output_dirroot = '.'
+	endif
+	return output_dirroot
 endfunc
 
 " リスト作成用
