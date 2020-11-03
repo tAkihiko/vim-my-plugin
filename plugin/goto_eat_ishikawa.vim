@@ -39,7 +39,7 @@ func! s:ParseGotoEatIshikawaHttpDir(dirname)
 	call append(0, output_lines)
 endfunc
 
-func! s:GetGotoEatHtmlFiles(city_name)
+func! s:GetGotoEatHtmlFiles(city_name) abort
 
 	if !has_key(s:city_list, a:city_name)
 		return
@@ -49,10 +49,19 @@ func! s:GetGotoEatHtmlFiles(city_name)
 	let url = city.url
 
 	" 出力ディレクトリを作成
-	let output_dirname = printf('%02d_%s_%s', output_dirroot, city.pri, city.yomi[0], strftime("%Y%m%d_%H%M"))
+	let output_dirname = printf('%02d_%s', city.pri, city.yomi[0])
 	let output_dirroot = s:GetOutputRootDir()
 	let output_dirpath = printf('%s/%s', output_dirroot, output_dirname)
-	call mkdir(output_dirpath)
+	if isdirectory(output_dirpath)
+		" ディレクトリの中身をクリア
+		for txt in readdir(output_dirpath, {n -> n =~ '\.txt$'})
+			let finepath = output_dirpath . '/' . txt
+			let ret = delete(finepath)
+		endfor
+	else
+		" ディレクトリを作成
+		call mkdir(output_dirpath)
+	endif
 
 	" 先頭のページを取得
 	let page = s:Http.get(url).content
@@ -69,7 +78,7 @@ func! s:GetGotoEatHtmlFiles(city_name)
 	" 2ページめ以降を取得
 	if max_page_no > 1
 		for n in range(2,max_page_no)
-			redraw | echo printf("Completed: %2d / %2d pages", n, max_page_no)
+			redraw | echo printf("Getting: %2d / %2d pages", n, max_page_no)
 			let page = s:Http.get(url.'/page/'.string(n).'/').content
 			call writefile([page], output_dirpath . printf('/%02d.txt', n))
 			sleep 100m
