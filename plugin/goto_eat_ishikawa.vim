@@ -86,6 +86,9 @@ func! s:GetGotoEatHtmlFiles(city_name) abort
 	endif
 	redraw | echo "Finish!"
 
+	" git を実行
+	call s:GitUpdate(output_dirroot)
+
 endfunc
 
 func! s:OpenDirecotry()
@@ -149,6 +152,21 @@ func! s:GetOutputRootDir()
 		let output_dirroot = '.'
 	endif
 	return output_dirroot
+endfunc
+
+func! s:GitUpdate(gitdir)
+	if executable('git')
+
+		let ret = system('git --git-dir=' . a:gitdir . '/.git add .')
+		if 0 != v:shell_error
+			return
+		endif
+
+		let ret = system('git --git-dir=' . a:gitdir . '/.git commit -m "Update"')
+		if 0 != v:shell_error
+			return
+		endif
+	endif
 endfunc
 
 " リスト作成用
