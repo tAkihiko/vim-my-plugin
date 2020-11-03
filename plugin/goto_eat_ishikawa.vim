@@ -49,9 +49,9 @@ func! s:GetGotoEatHtmlFiles(city_name)
 	let url = city.url
 
 	" 出力ディレクトリを作成
-	let output_dirname = strftime("%Y%m%d_%H%M")
+	let output_dirname = printf('%02d_%s_%s', output_dirroot, city.pri, city.yomi[0], strftime("%Y%m%d_%H%M"))
 	let output_dirroot = s:GetOutputRootDir()
-	let output_dirpath = printf('%s/%02d_%s_%s', output_dirroot, city.pri, city.yomi[0], output_dirname)
+	let output_dirpath = printf('%s/%s', output_dirroot, output_dirname)
 	call mkdir(output_dirpath)
 
 	" 先頭のページを取得
