@@ -16,3 +16,11 @@ function! tanikawa#util#DeleteConsecutiveDuplicateLines(begin,end) abort
 	endfor
 	call setline(a:begin, outlines)
 endfunction
+
+function! tanikawa#util#ReplaceToErrorFormat() abort
+	let line = getline('.')
+	let line = substitute(line, '[[.^]', '%\0', 'g')
+	let line = substitute(line, '\*', '%#', 'g')
+	let line = substitute(line, '\\', '%\\\\', 'g')
+	call setline('.', line)
+endfunction
