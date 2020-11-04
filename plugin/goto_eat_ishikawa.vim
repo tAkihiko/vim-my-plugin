@@ -84,10 +84,11 @@ func! s:GetGotoEatHtmlFiles(city_name) abort
 			sleep 100m
 		endfor
 	endif
-	redraw | echo "Finish!"
 
 	" git を実行
 	call s:GitUpdate(output_dirroot, printf("%s %s", city.yomi[0], strftime("%Y%m%d")))
+
+	redraw | echo "Finish!"
 
 endfunc
 
