@@ -34,9 +34,13 @@ func! s:ParseGotoEatIshikawaHttpDir(dirname)
 		let output_lines += s:ParseGotoEatIshikawaHttpFile(file_name)
 	endfor
 
-	exec 'new' dirname . '.txt'
-	% delete _
-	call append(0, output_lines)
+	let output_file = dirname . '.txt'
+	call writefile(output_lines, output_file)
+
+	call s:GitUpdate(fnamemodify(output_file, ':h'), fnamemodify(output_file, ':t'))
+
+	exe "edit" output_file
+
 endfunc
 
 func! s:GetGotoEatHtmlFiles(city_name) abort
