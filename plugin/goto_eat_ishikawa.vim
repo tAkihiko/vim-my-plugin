@@ -147,7 +147,7 @@ func! s:ComplIshikawaCity(ArgLead, CmdLine, CursorPos)
 endfunc
 
 func! s:ComplDateDir(ArgLead, CmdLine, CursorPos)
-	return join(reverse(readdir('.', {n->isdirectory(n)})), "\n")
+	return join(readdir('.', {n->isdirectory(n)&&n!~'\.git'}), "\n")
 endfunc
 
 func! s:GetOutputRootDir()
