@@ -87,7 +87,7 @@ func! s:GetGotoEatHtmlFiles(city_name) abort
 	redraw | echo "Finish!"
 
 	" git を実行
-	call s:GitUpdate(output_dirroot)
+	call s:GitUpdate(output_dirroot, printf("%s %s", city.yomi[0], strftime("%Y%m%d")))
 
 endfunc
 
@@ -154,7 +154,7 @@ func! s:GetOutputRootDir()
 	return output_dirroot
 endfunc
 
-func! s:GitUpdate(gitdir)
+func! s:GitUpdate(gitdir, message)
 	if executable('git')
 
 		let ret = system('git --git-dir=' . a:gitdir . '/.git add .')
@@ -162,7 +162,7 @@ func! s:GitUpdate(gitdir)
 			return
 		endif
 
-		let ret = system('git --git-dir=' . a:gitdir . '/.git commit -m "Update"')
+		let ret = system('git --git-dir=' . a:gitdir . '/.git commit -m "Update: ' . a:message . '"')
 		if 0 != v:shell_error
 			return
 		endif
