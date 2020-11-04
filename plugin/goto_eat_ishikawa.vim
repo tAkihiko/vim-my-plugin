@@ -90,9 +90,22 @@ func! s:GetGotoEatHtmlFiles(city_name) abort
 	endif
 
 	" git を実行
-	call s:GitUpdate(output_dirroot, printf("%s %s", city.yomi[0], strftime("%Y%m%d")))
+	let ret = s:GitUpdate(output_dirroot, printf("%s %s", city.yomi[0], strftime("%Y%m%d")))
+	if ret == s:GitUpdateResult.Success
+		let ret_str = "(Git Info: OK)"
+	elseif ret == s:GitUpdateResult.GitCmdLess
+		let ret_str = ""
+	elseif ret == s:GitUpdateResult.MissGitDir
+		let ret_str = "(Git Info: OK (".output_dirroot." is not git repo))"
+	elseif ret == s:GitUpdateResult.FailedGitAdd
+		let ret_str = "(Git Info: NG (git failed))"
+	elseif ret == s:GitUpdateResult.FailedGitCommit
+		let ret_str = "(Git Info: OK (not commited))"
+	else
+		let ret_str = "(Git Info: NG)"
+	end
 
-	redraw | echo "Finish!"
+	redraw | echo "Finish! " . ret_str
 
 endfunc
 
@@ -159,19 +172,34 @@ func! s:GetOutputRootDir()
 	return output_dirroot
 endfunc
 
+let s:GitUpdateResult = {
+			\ 'Success':         0,
+			\ 'GitCmdLess':      -1,
+			\ 'MissGitDir':      -2,
+			\ 'FailedGitAdd':    -3,
+			\ 'FailedGitCommit': -4
+			\ }
 func! s:GitUpdate(gitdir, message)
 	if executable('git')
+		if !isdirectory(a:gitdir . '/.git')
+			return s:GitUpdateResult.MissGitDir
+		endif
 
 		let ret = system('git --git-dir=' . a:gitdir . '/.git add .')
 		if 0 != v:shell_error
-			return
+			return s:GitUpdateResult.FailedGitAdd
 		endif
 
 		let ret = system('git --git-dir=' . a:gitdir . '/.git commit -m "Update: ' . a:message . '"')
 		if 0 != v:shell_error
-			return
+			return s:GitUpdateResult.FailedGitCommit
 		endif
+
+		return s:GitUpdateResult.Success
+	else
+		return s:GitUpdateResult.GitCmdLess
 	endif
+	return s:GitUpdateResult.Success
 endfunc
 
 " リスト作成用
