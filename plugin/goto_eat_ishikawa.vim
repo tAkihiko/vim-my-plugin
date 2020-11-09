@@ -7,9 +7,9 @@ let s:Xml = s:V.import('Web.XML')
 let s:Json = s:V.import('Web.JSON')
 
 " GoTo Eat Ishikawa
-command! -nargs=1 -complete=file GTEParseHttpFile call <SID>ParseGotoEatIshikawaHttpFile(<q-args>)
-command! -nargs=1 -complete=custom,<SID>ComplDateDir GTEParseHttpDir call <SID>ParseGotoEatIshikawaHttpDir(<q-args>)
-command! -nargs=1 -complete=customlist,<SID>ComplIshikawaCity GTEGetHtmlFiles call <SID>GetGotoEatHtmlFiles(<q-args>)
+"command! -nargs=1 -complete=file GTEParseHttpFile call <SID>ParseGotoEatIshikawaHttpFile(<q-args>)
+"command! -nargs=1 -complete=custom,<SID>ComplDateDir GTEParseHttpDir call <SID>ParseGotoEatIshikawaHttpDir(<q-args>)
+command! -nargs=1 -complete=customlist,<SID>ComplIshikawaCity GTEGetShopList call <SID>GetGotoEatShopList(<q-args>)
 command! GTEOpenDirectory call <SID>OpenDirecotry()
 command! GTECd call <SID>ChangeDirecotry()
 
@@ -37,13 +37,11 @@ func! s:ParseGotoEatIshikawaHttpDir(dirname)
 	let output_file = dirname . '.txt'
 	call writefile(output_lines, output_file)
 
-	call s:GitUpdate(fnamemodify(output_file, ':h'), fnamemodify(output_file, ':t'))
-
 	exe "edit" output_file
 
 endfunc
 
-func! s:GetGotoEatHtmlFiles(city_name) abort
+func! s:GetGotoEatShopList(city_name) abort
 
 	if !has_key(s:city_list, a:city_name)
 		return
@@ -88,6 +86,16 @@ func! s:GetGotoEatHtmlFiles(city_name) abort
 			sleep 100m
 		endfor
 	endif
+
+	" 変更があったか確認
+	let ret = s:GitCheck(output_dirroot)
+	if ret == s:GitCheckResult.NoChangedFiles
+		redraw | echo "Finish! No Changed Files."
+		return
+	endif
+
+	" 一覧ファイルを取得
+	call s:ParseGotoEatIshikawaHttpDir(output_dirpath)
 
 	" git を実行
 	let ret = s:GitUpdate(output_dirroot, printf("%s %s", city.yomi[0], strftime("%Y%m%d")))
@@ -170,6 +178,38 @@ func! s:GetOutputRootDir()
 		let output_dirroot = '.'
 	endif
 	return output_dirroot
+endfunc
+
+let s:GitCheckResult = {
+			\ 'Success':         0,
+			\ 'NoChangedFiles': 1,
+			\ 'GitCmdLess':      -1,
+			\ 'MissGitDir':      -2,
+			\ 'FailedGitStatus': -3
+			\ }
+func! s:GitCheck(gitdir)
+	if executable('git')
+		if !isdirectory(a:gitdir . '/.git')
+			return s:GitCheckResult.MissGitDir
+		endif
+
+		" カレントディレクトリが git の管理下でないと git status が正しく機能しない。
+		exec 'lcd' a:gitdir
+		let ret = system('git --git-dir=' . a:gitdir . '/.git status --short')
+		exec 'lcd' '-'
+		if 0 != v:shell_error
+			return s:GitCheckResult.FailedGitStatus
+		endif
+
+		if len(ret) < 1
+			return s:GitCheckResult.NoChangedFiles
+		endif
+
+		return s:GitCheckResult.Success
+	else
+		return s:GitCheckResult.GitCmdLess
+	endif
+	return s:GitCheckResult.Success
 endfunc
 
 let s:GitUpdateResult = {
