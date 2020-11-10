@@ -11,7 +11,8 @@ let s:Json = s:V.import('Web.JSON')
 "command! -nargs=1 -complete=custom,<SID>ComplDateDir GTEParseHttpDir call <SID>ParseGotoEatIshikawaHttpDir(<q-args>)
 command! -nargs=1 -complete=customlist,<SID>ComplIshikawaCity GTEGetShopList call <SID>GetGotoEatShopList(<q-args>)
 command! GTEOpenDirectory call <SID>OpenDirecotry()
-command! GTECd call <SID>ChangeDirecotry()
+command! GTECd call <SID>ChangeDirecotry(1)
+command! GTELcd call <SID>ChangeDirecotry(2)
 
 func! s:ParseGotoEatIshikawaHttpFile(filename)
 	let parsed = s:Xml.parseFile(a:filename).findAll({'class':'member_item'})
@@ -49,6 +50,9 @@ func! s:GetGotoEatShopList(city_name) abort
 
 	let city = s:city_list[a:city_name]
 	let url = city.url
+
+	" カレントディレクトリを設定
+	let cwd = s:ChangeDirecotry(2)
 
 	" 出力ディレクトリを作成
 	let output_dirname = printf('%02d_%s', city.pri, city.yomi[0])
@@ -91,6 +95,7 @@ func! s:GetGotoEatShopList(city_name) abort
 	let ret = s:GitCheck(output_dirroot)
 	if ret == s:GitCheckResult.NoChangedFiles
 		redraw | echo "Finish! No Changed Files."
+		call s:ChangeDirecotry(-2, cwd)
 		return
 	endif
 
@@ -126,9 +131,30 @@ func! s:OpenDirecotry()
 	endif
 endfunc
 
-func! s:ChangeDirecotry()
-	let output_dirroot = s:GetOutputRootDir()
-	exec 'cd' output_dirroot
+func! s:ChangeDirecotry(mode, path = '.')
+
+	let old_path = getcwd()
+
+	" cd/lcd 選択
+	if a:mode == 1 || a:mode == -1
+		let cmd = 'cd'
+	elseif a:mode == 2 || a:mode == -2
+		let cmd = 'lcd'
+	else
+		echoerr 'Invalid Args: ' . string(a:mode)
+	endif
+
+	if a:mode > 0
+		let target_path = s:GetOutputRootDir()
+	elseif a:mode < 0
+		let target_path = a:path
+	else
+		echoerr 'Invalid Args: ' . string(a:mode)
+	endif
+
+	exec cmd target_path
+
+	return old_path
 endfunc
 
 let s:city_list = {
@@ -194,9 +220,7 @@ func! s:GitCheck(gitdir)
 		endif
 
 		" カレントディレクトリが git の管理下でないと git status が正しく機能しない。
-		exec 'lcd' a:gitdir
 		let ret = system('git --git-dir=' . a:gitdir . '/.git status --short')
-		exec 'lcd' '-'
 		if 0 != v:shell_error
 			return s:GitCheckResult.FailedGitStatus
 		endif
