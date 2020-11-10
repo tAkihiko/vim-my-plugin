@@ -7,11 +7,12 @@ let s:Xml = s:V.import('Web.XML')
 let s:Json = s:V.import('Web.JSON')
 
 " GoTo Eat Ishikawa
-command! -nargs=1 -complete=file GTEParseHttpFile call <SID>ParseGotoEatIshikawaHttpFile(<q-args>)
-command! -nargs=1 -complete=custom,<SID>ComplDateDir GTEParseHttpDir call <SID>ParseGotoEatIshikawaHttpDir(<q-args>)
-command! -nargs=1 -complete=customlist,<SID>ComplIshikawaCity GTEGetHtmlFiles call <SID>GetGotoEatHtmlFiles(<q-args>)
+"command! -nargs=1 -complete=file GTEParseHttpFile call <SID>ParseGotoEatIshikawaHttpFile(<q-args>)
+"command! -nargs=1 -complete=custom,<SID>ComplDateDir GTEParseHttpDir call <SID>ParseGotoEatIshikawaHttpDir(<q-args>)
+command! -nargs=1 -complete=customlist,<SID>ComplIshikawaCity GTEGetShopList call <SID>GetGotoEatShopList(<q-args>)
 command! GTEOpenDirectory call <SID>OpenDirecotry()
-command! GTECd call <SID>ChangeDirecotry()
+command! GTECd call <SID>ChangeDirecotry(1)
+command! GTELcd call <SID>ChangeDirecotry(2)
 
 func! s:ParseGotoEatIshikawaHttpFile(filename)
 	let parsed = s:Xml.parseFile(a:filename).findAll({'class':'member_item'})
@@ -34,12 +35,14 @@ func! s:ParseGotoEatIshikawaHttpDir(dirname)
 		let output_lines += s:ParseGotoEatIshikawaHttpFile(file_name)
 	endfor
 
-	exec 'new' dirname . '.txt'
-	% delete _
-	call append(0, output_lines)
+	let output_file = dirname . '.txt'
+	call writefile(output_lines, output_file)
+
+	exe "edit" output_file
+
 endfunc
 
-func! s:GetGotoEatHtmlFiles(city_name)
+func! s:GetGotoEatShopList(city_name) abort
 
 	if !has_key(s:city_list, a:city_name)
 		return
@@ -48,11 +51,23 @@ func! s:GetGotoEatHtmlFiles(city_name)
 	let city = s:city_list[a:city_name]
 	let url = city.url
 
+	" カレントディレクトリを設定
+	let cwd = s:ChangeDirecotry(2)
+
 	" 出力ディレクトリを作成
-	let output_dirname = strftime("%Y%m%d_%H%M")
+	let output_dirname = printf('%02d_%s', city.pri, city.yomi[0])
 	let output_dirroot = s:GetOutputRootDir()
-	let output_dirpath = printf('%s/%02d_%s_%s', output_dirroot, city.pri, city.yomi[0], output_dirname)
-	call mkdir(output_dirpath)
+	let output_dirpath = printf('%s/%s', output_dirroot, output_dirname)
+	if isdirectory(output_dirpath)
+		" ディレクトリの中身をクリア
+		for txt in readdir(output_dirpath, {n -> n =~ '\.txt$'})
+			let finepath = output_dirpath . '/' . txt
+			let ret = delete(finepath)
+		endfor
+	else
+		" ディレクトリを作成
+		call mkdir(output_dirpath)
+	endif
 
 	" 先頭のページを取得
 	let page = s:Http.get(url).content
@@ -69,13 +84,41 @@ func! s:GetGotoEatHtmlFiles(city_name)
 	" 2ページめ以降を取得
 	if max_page_no > 1
 		for n in range(2,max_page_no)
-			redraw | echo printf("Completed: %2d / %2d pages", n, max_page_no)
+			redraw | echo printf("Getting: %2d / %2d pages", n, max_page_no)
 			let page = s:Http.get(url.'/page/'.string(n).'/').content
 			call writefile([page], output_dirpath . printf('/%02d.txt', n))
 			sleep 100m
 		endfor
 	endif
-	redraw | echo "Finish!"
+
+	" 変更があったか確認
+	let ret = s:GitCheck(output_dirroot)
+	if ret == s:GitCheckResult.NoChangedFiles
+		redraw | echo "Finish! No Changed Files."
+		call s:ChangeDirecotry(-2, cwd)
+		return
+	endif
+
+	" 一覧ファイルを取得
+	call s:ParseGotoEatIshikawaHttpDir(output_dirpath)
+
+	" git を実行
+	let ret = s:GitUpdate(output_dirroot, printf("%s %s", city.yomi[0], strftime("%Y%m%d")))
+	if ret == s:GitUpdateResult.Success
+		let ret_str = "(Git Info: OK)"
+	elseif ret == s:GitUpdateResult.GitCmdLess
+		let ret_str = ""
+	elseif ret == s:GitUpdateResult.MissGitDir
+		let ret_str = "(Git Info: OK (".output_dirroot." is not git repo))"
+	elseif ret == s:GitUpdateResult.FailedGitAdd
+		let ret_str = "(Git Info: NG (git failed))"
+	elseif ret == s:GitUpdateResult.FailedGitCommit
+		let ret_str = "(Git Info: OK (not commited))"
+	else
+		let ret_str = "(Git Info: NG)"
+	end
+
+	redraw | echo "Finish! " . ret_str
 
 endfunc
 
@@ -88,9 +131,30 @@ func! s:OpenDirecotry()
 	endif
 endfunc
 
-func! s:ChangeDirecotry()
-	let output_dirroot = s:GetOutputRootDir()
-	exec 'cd' output_dirroot
+func! s:ChangeDirecotry(mode, path = '.')
+
+	let old_path = getcwd()
+
+	" cd/lcd 選択
+	if a:mode == 1 || a:mode == -1
+		let cmd = 'cd'
+	elseif a:mode == 2 || a:mode == -2
+		let cmd = 'lcd'
+	else
+		echoerr 'Invalid Args: ' . string(a:mode)
+	endif
+
+	if a:mode > 0
+		let target_path = s:GetOutputRootDir()
+	elseif a:mode < 0
+		let target_path = a:path
+	else
+		echoerr 'Invalid Args: ' . string(a:mode)
+	endif
+
+	exec cmd target_path
+
+	return old_path
 endfunc
 
 let s:city_list = {
@@ -130,7 +194,7 @@ func! s:ComplIshikawaCity(ArgLead, CmdLine, CursorPos)
 endfunc
 
 func! s:ComplDateDir(ArgLead, CmdLine, CursorPos)
-	return join(reverse(readdir('.', {n->isdirectory(n)})), "\n")
+	return join(readdir('.', {n->isdirectory(n)&&n!~'\.git'}), "\n")
 endfunc
 
 func! s:GetOutputRootDir()
@@ -140,6 +204,66 @@ func! s:GetOutputRootDir()
 		let output_dirroot = '.'
 	endif
 	return output_dirroot
+endfunc
+
+let s:GitCheckResult = {
+			\ 'Success':         0,
+			\ 'NoChangedFiles': 1,
+			\ 'GitCmdLess':      -1,
+			\ 'MissGitDir':      -2,
+			\ 'FailedGitStatus': -3
+			\ }
+func! s:GitCheck(gitdir)
+	if executable('git')
+		if !isdirectory(a:gitdir . '/.git')
+			return s:GitCheckResult.MissGitDir
+		endif
+
+		" カレントディレクトリが git の管理下でないと git status が正しく機能しない。
+		let ret = system('git --git-dir=' . a:gitdir . '/.git status --short')
+		if 0 != v:shell_error
+			return s:GitCheckResult.FailedGitStatus
+		endif
+
+		if len(ret) < 1
+			return s:GitCheckResult.NoChangedFiles
+		endif
+
+		return s:GitCheckResult.Success
+	else
+		return s:GitCheckResult.GitCmdLess
+	endif
+	return s:GitCheckResult.Success
+endfunc
+
+let s:GitUpdateResult = {
+			\ 'Success':         0,
+			\ 'GitCmdLess':      -1,
+			\ 'MissGitDir':      -2,
+			\ 'FailedGitAdd':    -3,
+			\ 'FailedGitCommit': -4
+			\ }
+func! s:GitUpdate(gitdir, message)
+	if executable('git')
+		if !isdirectory(a:gitdir . '/.git')
+			return s:GitUpdateResult.MissGitDir
+		endif
+
+		let ret = system('git --git-dir=' . a:gitdir . '/.git add .')
+		if 0 != v:shell_error
+			return s:GitUpdateResult.FailedGitAdd
+		endif
+
+		let ret = system('git --git-dir=' . a:gitdir . '/.git commit -m "Update: ' . a:message . '"')
+		if 0 != v:shell_error
+			return s:GitUpdateResult.FailedGitCommit
+		endif
+
+		return s:GitUpdateResult.Success
+	else
+		return s:GitUpdateResult.GitCmdLess
+	endif
+	return s:GitUpdateResult.Success
 endfunc
 
 " リスト作成用
