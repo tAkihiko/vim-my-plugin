@@ -10,6 +10,7 @@ let s:Json = s:V.import('Web.JSON')
 "command! -nargs=1 -complete=file GTEParseHttpFile call <SID>ParseGotoEatIshikawaHttpFile(<q-args>)
 "command! -nargs=1 -complete=custom,<SID>ComplDateDir GTEParseHttpDir call <SID>ParseGotoEatIshikawaHttpDir(<q-args>)
 command! -nargs=1 -complete=customlist,<SID>ComplIshikawaCity GTEGetShopList call <SID>GetGotoEatShopList(<q-args>)
+command! GTEGetShopListAll call <SID>GetGotoEatShopListAll()
 command! GTEOpenDirectory call <SID>OpenDirecotry()
 command! GTECd call <SID>ChangeDirecotry(1)
 command! GTELcd call <SID>ChangeDirecotry(2)
@@ -25,7 +26,7 @@ func! s:ParseGotoEatIshikawaHttpFile(filename)
 	return output_lines
 endfunc
 
-func! s:ParseGotoEatIshikawaHttpDir(dirname)
+func! s:ParseGotoEatIshikawaHttpDir(dirname, open = v:true)
 	let dirname = fnamemodify(a:dirname, ':p:h')
 	let file_list = readdir(dirname, {n->n =~ '\.txt$'})
 	let output_lines = []
@@ -38,11 +39,25 @@ func! s:ParseGotoEatIshikawaHttpDir(dirname)
 	let output_file = dirname . '.txt'
 	call writefile(output_lines, output_file)
 
-	exe "edit" output_file
+	if a:open
+		exe "edit" output_file
+	endif
 
 endfunc
 
-func! s:GetGotoEatShopList(city_name) abort
+func! s:GetGotoEatShopListAll() abort
+	let cwd = s:ChangeDirecotry(2)
+
+	for city in s:city_list->keys()
+		call s:GetGotoEatShopList(city, v:false)
+	endfor
+
+	let output_dirroot = s:GetOutputRootDir()
+	call s:GitUpdate(output_dirroot, printf("%s %s", "All", strftime("%Y%m%d")))
+	call s:ChangeDirecotry(-2, cwd)
+endfunc
+
+func! s:GetGotoEatShopList(city_name, update = v:true) abort
 
 	if !has_key(s:city_list, a:city_name)
 		return
@@ -84,7 +99,7 @@ func! s:GetGotoEatShopList(city_name) abort
 	" 2ページめ以降を取得
 	if max_page_no > 1
 		for n in range(2,max_page_no)
-			redraw | echo printf("Getting: %2d / %2d pages", n, max_page_no)
+			redraw | echo printf("Getting %s: %2d / %2d pages", a:city_name, n, max_page_no)
 			let page = s:Http.get(url.'/page/'.string(n).'/').content
 			call writefile([page], output_dirpath . printf('/%02d.txt', n))
 			sleep 100m
@@ -92,7 +107,7 @@ func! s:GetGotoEatShopList(city_name) abort
 	endif
 
 	" 変更があったか確認
-	let ret = s:GitCheck(output_dirroot)
+	let ret = s:GitCheck(output_dirroot, output_dirpath)
 	if ret == s:GitCheckResult.NoChangedFiles
 		redraw | echo "Finish! No Changed Files."
 		call s:ChangeDirecotry(-2, cwd)
@@ -100,7 +115,12 @@ func! s:GetGotoEatShopList(city_name) abort
 	endif
 
 	" 一覧ファイルを取得
-	call s:ParseGotoEatIshikawaHttpDir(output_dirpath)
+	call s:ParseGotoEatIshikawaHttpDir(output_dirpath, a:update)
+
+	" Updateフラグが無ければ終了
+	if !a:update
+		return
+	endif
 
 	" git を実行
 	let ret = s:GitUpdate(output_dirroot, printf("%s %s", city.yomi[0], strftime("%Y%m%d")))
@@ -213,14 +233,20 @@ let s:GitCheckResult = {
 			\ 'MissGitDir':      -2,
 			\ 'FailedGitStatus': -3
 			\ }
-func! s:GitCheck(gitdir)
+func! s:GitCheck(gitdir, subdir = ".")
+	" 注意: この関数を使うときはカレントディレクトリが
+	"       Gitのワーキングディレクトリ内であること！！
 	if executable('git')
 		if !isdirectory(a:gitdir . '/.git')
 			return s:GitCheckResult.MissGitDir
 		endif
 
 		" カレントディレクトリが git の管理下でないと git status が正しく機能しない。
-		let ret = system('git --git-dir=' . a:gitdir . '/.git status --short')
+		let subdir = "."
+		if isdirectory(a:subdir)
+			let subdir = a:subdir
+		endif
+		let ret = system('git --git-dir=' . a:gitdir . '/.git status --short -- ' . a:subdir)
 		if 0 != v:shell_error
 			return s:GitCheckResult.FailedGitStatus
 		endif
