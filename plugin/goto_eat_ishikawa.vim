@@ -50,6 +50,7 @@ func! s:GetGotoEatShopListAll() abort
 
 	for city in s:city_list->keys()
 		call s:GetGotoEatShopList(city, v:false)
+		sleep 500m
 	endfor
 
 	let output_dirroot = s:GetOutputRootDir()
