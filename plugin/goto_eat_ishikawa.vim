@@ -85,6 +85,7 @@ func! s:GetGotoEatShopList(city_name, update = v:true) abort
 	endif
 
 	" 先頭のページを取得
+	redraw | echo printf("%s 取得中:  1 / ?? pages", a:city_name)
 	let page = s:Http.get(url).content
 	call writefile([page], output_dirpath . '/01.txt')
 
@@ -99,7 +100,7 @@ func! s:GetGotoEatShopList(city_name, update = v:true) abort
 	" 2ページめ以降を取得
 	if max_page_no > 1
 		for n in range(2,max_page_no)
-			redraw | echo printf("Getting %s: %2d / %2d pages", a:city_name, n, max_page_no)
+			redraw | echo printf("%s 取得中: %2d / %2d pages", a:city_name, n, max_page_no)
 			let page = s:Http.get(url.'/page/'.string(n).'/').content
 			call writefile([page], output_dirpath . printf('/%02d.txt', n))
 			sleep 100m
@@ -109,7 +110,7 @@ func! s:GetGotoEatShopList(city_name, update = v:true) abort
 	" 変更があったか確認
 	let ret = s:GitCheck(output_dirroot, output_dirpath)
 	if ret == s:GitCheckResult.NoChangedFiles
-		redraw | echo "Finish! No Changed Files."
+		redraw | echo printf("%s 取得完了: 変更ファイルなし", a:city_name)
 		call s:ChangeDirecotry(-2, cwd)
 		return
 	endif
@@ -138,7 +139,7 @@ func! s:GetGotoEatShopList(city_name, update = v:true) abort
 		let ret_str = "(Git Info: NG)"
 	end
 
-	redraw | echo "Finish! " . ret_str
+	redraw | echo printf("%s 取得完了: %s", a:city_name, ret_str)
 
 endfunc
 
