@@ -54,8 +54,23 @@ func! s:GetGotoEatShopListAll() abort
 	endfor
 
 	let output_dirroot = s:GetOutputRootDir()
-	call s:GitUpdate(output_dirroot, printf("%s %s", "All", strftime("%Y%m%d")))
+	let ret = s:GitUpdate(output_dirroot, printf("%s %s", "All", strftime("%Y%m%d")))
 	call s:ChangeDirecotry(-2, cwd)
+
+	if ret == s:GitUpdateResult.Success
+		let ret_str = "更新あり"
+	elseif ret == s:GitUpdateResult.GitCmdLess
+		let ret_str = ""
+	elseif ret == s:GitUpdateResult.MissGitDir
+		let ret_str = "(Git Info: OK (".output_dirroot." is not git repo))"
+	elseif ret == s:GitUpdateResult.FailedGitAdd
+		let ret_str = "(Git Info: NG (git failed))"
+	elseif ret == s:GitUpdateResult.FailedGitCommit
+		let ret_str = "更新無し"
+	else
+		let ret_str = "(Git Info: NG)"
+	end
+	redraw | echomsg printf("All 取得完了: %s", ret_str)
 endfunc
 
 func! s:GetGotoEatShopList(city_name, update = v:true) abort
@@ -111,7 +126,7 @@ func! s:GetGotoEatShopList(city_name, update = v:true) abort
 	" 変更があったか確認
 	let ret = s:GitCheck(output_dirroot, output_dirpath)
 	if ret == s:GitCheckResult.NoChangedFiles
-		redraw | echo printf("%s 取得完了: 変更ファイルなし", a:city_name)
+		redraw | echomsg printf("%s 取得完了: 変更ファイルなし", a:city_name)
 		call s:ChangeDirecotry(-2, cwd)
 		return
 	endif
@@ -140,7 +155,7 @@ func! s:GetGotoEatShopList(city_name, update = v:true) abort
 		let ret_str = "(Git Info: NG)"
 	end
 
-	redraw | echo printf("%s 取得完了: %s", a:city_name, ret_str)
+	redraw | echomsg printf("%s 取得完了: %s", a:city_name, ret_str)
 
 endfunc
 
