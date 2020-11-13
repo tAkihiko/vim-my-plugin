@@ -15,7 +15,7 @@ command! GTEOpenDirectory call <SID>OpenDirecotry()
 command! GTECd call <SID>ChangeDirecotry(1)
 command! GTELcd call <SID>ChangeDirecotry(2)
 
-func! s:ParseGotoEatIshikawaHttpFile(filename)
+func! s:ParseGotoEatIshikawaHttpFile(filename) abort
 	let parsed = s:Xml.parseFile(a:filename).findAll({'class':'member_item'})
 	let output_lines = []
 
@@ -26,7 +26,7 @@ func! s:ParseGotoEatIshikawaHttpFile(filename)
 	return output_lines
 endfunc
 
-func! s:ParseGotoEatIshikawaHttpDir(dirname, open = v:true)
+func! s:ParseGotoEatIshikawaHttpDir(dirname, open = v:true) abort
 	let dirname = fnamemodify(a:dirname, ':p:h')
 	let file_list = readdir(dirname, {n->n =~ '\.txt$'})
 	let output_lines = []
