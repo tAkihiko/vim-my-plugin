@@ -48,7 +48,7 @@ endfunc
 func! s:GetGotoEatShopListAll() abort
 	let cwd = s:ChangeDirecotry(2)
 
-	for city in s:city_list->keys()
+	for city in s:city_list->keys()->sort({a,b->s:city_list[a].pri-s:city_list[b].pri})
 		call s:GetGotoEatShopList(city, v:false)
 		sleep 500m
 	endfor
