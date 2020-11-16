@@ -20,7 +20,7 @@ func! s:ParseGotoEatIshikawaHttpFile(filename) abort
 	let output_lines = []
 
 	for node in parsed
-		let output_lines += [ node.find({'class':'name'}).value() ]
+		let output_lines += [ node.find({'class':'name'}).value()->substitute('\r.*', '', 'g') ]
 	endfor
 
 	return output_lines
@@ -103,6 +103,10 @@ func! s:GetGotoEatShopList(city_name, update = v:true) abort
 	" 先頭のページを取得
 	redraw | echo printf("%s 取得中:  1 / ?? pages", a:city_name)
 	let page = s:Http.get(url).content
+	" タグ内の半角<>を全角＜＞に置き換え
+	" TODO: FIXME: 1つの組み合わせしか置き換えられない
+	let page = page->substitute('\(<h4\s*class="name"\s*>[^<]*\)<\([^<]*<\/h4>\)', '\1＜\2', 'g')
+	let page = page->substitute('\(<h4\s*class="name"\s*>[^>]*\)>\([^>]*<\/h4>\)', '\1＞\2', 'g')
 	call writefile([page], output_dirpath . '/01.txt')
 
 	" 最大のページ番号を取得
