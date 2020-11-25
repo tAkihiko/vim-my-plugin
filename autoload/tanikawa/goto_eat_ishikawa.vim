@@ -6,28 +6,38 @@ let s:Http = s:V.import('Web.HTTP')
 let s:Xml = s:V.import('Web.XML')
 let s:Json = s:V.import('Web.JSON')
 
+let s:delimiter = {'filetype': 'tsv', 'delim' : "\t"}
+
 func! tanikawa#goto_eat_ishikawa#ParseGotoEatIshikawaHttpFile(filename) abort
+	" 1ファイル分をパース
 	let parsed = s:Xml.parseFile(a:filename).findAll({'class':'member_item'})
 	let output_lines = []
 
+	" 1行ずつ変換
 	for node in parsed
-		let output_lines += [ node.find({'class':'name'}).value()->substitute('\r.*', '', 'g') ]
+		let name = node.find({'class':'name'}).value()->substitute('\r.*', '', 'g') 
+		let address = node.find({'class':'address'}).find({'class':'content'}).value()->substitute('[\r\n\t]\|\%x00','','g')
+		let output_lines += [ join([name, address], s:delimiter.delim) ]
 	endfor
 
 	return output_lines
 endfunc
 
 func! tanikawa#goto_eat_ishikawa#ParseGotoEatIshikawaHttpDir(dirname, open = v:true) abort
+
+	let output_lines = []
+
+	" 中間ファイル保存フォルダからテキストファイルを取得し処理する
 	let dirname = fnamemodify(a:dirname, ':p:h')
 	let file_list = readdir(dirname, {n->n =~ '\.txt$'})
-	let output_lines = []
 	for file_name in file_list
 		let file_name = fnamemodify(dirname . '/' . file_name, ':p')
 		redraw | echo file_name
 		let output_lines += tanikawa#goto_eat_ishikawa#ParseGotoEatIshikawaHttpFile(file_name)
 	endfor
 
-	let output_file = dirname . '.txt'
+	" 出力
+	let output_file = dirname . '.' . s:delimiter.filetype
 	call writefile(output_lines, output_file)
 
 	if a:open
