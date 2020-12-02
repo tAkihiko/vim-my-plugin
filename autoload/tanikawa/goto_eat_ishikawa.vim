@@ -16,7 +16,7 @@ func! tanikawa#goto_eat_ishikawa#ParseGotoEatIshikawaHttpFile(filename) abort
 	" 1行ずつ変換
 	for node in parsed
 		let name = node.find({'class':'name'}).value()->substitute('\r.*', '', 'g') 
-		let address = node.find({'class':'address'}).find({'class':'content'}).value()->substitute('[\r\n\t]\|\%x00','','g')
+		let address = node.find({'class':'address'}).find({'class':'content'}).value()->substitute('[\r\n\t]\|\%x00','','g')->substitute('　', ' ', 'g')
 		let output_lines += [ join([name, address], s:delimiter.delim) ]
 	endfor
 
