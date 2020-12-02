@@ -37,8 +37,9 @@ func! tanikawa#goto_eat_ishikawa#ParseGotoEatIshikawaHttpDir(dirname, open = v:t
 	endfor
 
 	" 出力
+	" TODO: 2000行を超えるようなら分割する
 	let output_file = dirname . '.' . s:delimiter.filetype
-	call writefile(output_lines, output_file)
+	call writefile([join(['店名','住所'],s:delimiter.delim)]+output_lines, output_file)
 
 	if a:open
 		exe "edit" output_file
@@ -46,11 +47,27 @@ func! tanikawa#goto_eat_ishikawa#ParseGotoEatIshikawaHttpDir(dirname, open = v:t
 
 endfunc
 
+func! s:GetTargetList(name = v:null)
+	if a:name == v:null
+		" デフォルトのリストを返す
+		return s:category_list
+	endif
+
+	if has_key(s:city_list, a:name)
+		return s:city_list
+	elseif has_key(s:category_list, a:name)
+		return s:category_list
+	else
+		return {}
+	endif
+endfunc
+
 func! tanikawa#goto_eat_ishikawa#GetGotoEatShopListAll() abort
 	let cwd = tanikawa#goto_eat_ishikawa#ChangeDirecotry(2)
 
-	for city in s:city_list->keys()->sort({a,b->s:city_list[a].pri-s:city_list[b].pri})
-		call tanikawa#goto_eat_ishikawa#GetGotoEatShopList(city, v:false)
+	let target_list = s:GetTargetList()
+	for target in target_list->keys()->sort({a,b->target_list[a].pri-target_list[b].pri})
+		call tanikawa#goto_eat_ishikawa#GetGotoEatShopList(target, v:false)
 		sleep 500m
 	endfor
 
@@ -74,20 +91,21 @@ func! tanikawa#goto_eat_ishikawa#GetGotoEatShopListAll() abort
 	redraw | echomsg printf("All 取得完了: %s", ret_str)
 endfunc
 
-func! tanikawa#goto_eat_ishikawa#GetGotoEatShopList(city_name, update = v:true) abort
+func! tanikawa#goto_eat_ishikawa#GetGotoEatShopList(target_name, update = v:true) abort
 
-	if !has_key(s:city_list, a:city_name)
+	let target_list = s:GetTargetList(a:target_name)
+	if target_list == {}
 		return
 	endif
 
-	let city = s:city_list[a:city_name]
-	let url = city.url
+	let target = target_list[a:target_name]
+	let url = target.url
 
 	" カレントディレクトリを設定
 	let cwd = tanikawa#goto_eat_ishikawa#ChangeDirecotry(2)
 
 	" 出力ディレクトリを作成
-	let output_dirname = printf('%02d_%s', city.pri, city.yomi[0])
+	let output_dirname = printf('%02d_%s', target.pri, target.yomi[0])
 	let output_dirroot = s:GetOutputRootDir()
 	let output_dirpath = printf('%s/%s', output_dirroot, output_dirname)
 	if isdirectory(output_dirpath)
@@ -102,7 +120,7 @@ func! tanikawa#goto_eat_ishikawa#GetGotoEatShopList(city_name, update = v:true) 
 	endif
 
 	" 先頭のページを取得
-	redraw | echo printf("%s 取得中:  1 / ?? pages", a:city_name)
+	redraw | echo printf("%s 取得中:  1 / ?? pages", a:target_name)
 	let page = s:Http.get(url).content
 	" タグ内の半角<>を全角＜＞に置き換え
 	" TODO: FIXME: 1つの組み合わせしか置き換えられない
@@ -121,8 +139,8 @@ func! tanikawa#goto_eat_ishikawa#GetGotoEatShopList(city_name, update = v:true) 
 	" 2ページめ以降を取得
 	if max_page_no > 1
 		for n in range(2,max_page_no)
-			redraw | echo printf("%s 取得中: %2d / %2d pages", a:city_name, n, max_page_no)
-			let page = s:Http.get(url.'/page/'.string(n).'/').content
+			redraw | echo printf("%s 取得中: %2d / %2d pages", a:target_name, n, max_page_no)
+			let page = s:Http.get(url.'&paged='.string(n)).content
 			call writefile([page], output_dirpath . printf('/%02d.txt', n))
 			sleep 100m
 		endfor
@@ -131,7 +149,7 @@ func! tanikawa#goto_eat_ishikawa#GetGotoEatShopList(city_name, update = v:true) 
 	" 変更があったか確認
 	let ret = s:GitCheck(output_dirroot, output_dirpath)
 	if ret == s:GitCheckResult.NoChangedFiles
-		redraw | echomsg printf("%s 取得完了: 変更ファイルなし", a:city_name)
+		redraw | echomsg printf("%s 取得完了: 変更ファイルなし", a:target_name)
 		call tanikawa#goto_eat_ishikawa#ChangeDirecotry(-2, cwd)
 		return
 	endif
@@ -145,7 +163,7 @@ func! tanikawa#goto_eat_ishikawa#GetGotoEatShopList(city_name, update = v:true) 
 	endif
 
 	" git を実行
-	let ret = s:GitUpdate(output_dirroot, printf("%s %s", city.yomi[0], strftime("%Y%m%d")))
+	let ret = s:GitUpdate(output_dirroot, printf("%s %s", target.yomi[0], strftime("%Y%m%d")))
 	if ret == s:GitUpdateResult.Success
 		let ret_str = "(Git Info: OK)"
 	elseif ret == s:GitUpdateResult.GitCmdLess
@@ -160,7 +178,7 @@ func! tanikawa#goto_eat_ishikawa#GetGotoEatShopList(city_name, update = v:true) 
 		let ret_str = "(Git Info: NG)"
 	end
 
-	redraw | echomsg printf("%s 取得完了: %s", a:city_name, ret_str)
+	redraw | echomsg printf("%s 取得完了: %s", a:target_name, ret_str)
 
 endfunc
 
@@ -200,30 +218,44 @@ func! tanikawa#goto_eat_ishikawa#ChangeDirecotry(mode, path = '.')
 endfunc
 
 let s:city_list = {
-			\ '金沢市':     {'pri': 1,  'url': 'https://ishikawa-gotoeat-cpn.com/cities/%e9%87%91%e6%b2%a2%e5%b8%82/',                   'yomi': ['kanazawa',        'かなざわ']},
-			\ '七尾市':     {'pri': 2,  'url': 'https://ishikawa-gotoeat-cpn.com/cities/%e4%b8%83%e5%b0%be%e5%b8%82/',                   'yomi': ['nanao',           'ななお']},
-			\ '小松市':     {'pri': 3,  'url': 'https://ishikawa-gotoeat-cpn.com/cities/%e5%b0%8f%e6%9d%be%e5%b8%82/',                   'yomi': ['komatsu',         'こまつ']},
-			\ '輪島市':     {'pri': 4,  'url': 'https://ishikawa-gotoeat-cpn.com/cities/%e8%bc%aa%e5%b3%b6%e5%b8%82/',                   'yomi': ['wajima',          'わじま']},
-			\ '珠洲市':     {'pri': 5,  'url': 'https://ishikawa-gotoeat-cpn.com/cities/%e7%8f%a0%e6%b4%b2%e5%b8%82/',                   'yomi': ['suzu',            'すず']},
-			\ '加賀市':     {'pri': 6,  'url': 'https://ishikawa-gotoeat-cpn.com/cities/%e5%8a%a0%e8%b3%80%e5%b8%82/',                   'yomi': ['kaga',            'かが']},
-			\ '羽咋市':     {'pri': 7,  'url': 'https://ishikawa-gotoeat-cpn.com/cities/%e7%be%bd%e5%92%8b%e5%b8%82/',                   'yomi': ['hakui',           'はくい']},
-			\ 'かほく市':   {'pri': 8,  'url': 'https://ishikawa-gotoeat-cpn.com/cities/%e3%81%8b%e3%81%bb%e3%81%8f%e5%b8%82/',          'yomi': ['kahoku',          'かほく']},
-			\ '白山市':     {'pri': 9,  'url': 'https://ishikawa-gotoeat-cpn.com/cities/%e7%99%bd%e5%b1%b1%e5%b8%82/',                   'yomi': ['hakusan',         'はくさん']},
-			\ '能美市':     {'pri': 10, 'url': 'https://ishikawa-gotoeat-cpn.com/cities/%e8%83%bd%e7%be%8e%e5%b8%82/',                   'yomi': ['nomi',            'のみ']},
-			\ '野々市市':   {'pri': 11, 'url': 'https://ishikawa-gotoeat-cpn.com/cities/%e9%87%8e%e3%80%85%e5%b8%82%e5%b8%82/',          'yomi': ['nonoichi',        'ののいち']},
-			\ '川北町':     {'pri': 12, 'url': 'https://ishikawa-gotoeat-cpn.com/cities/%e5%b7%9d%e5%8c%97%e7%94%ba/',                   'yomi': ['kawakita',        'かわきた']},
-			\ '津幡町':     {'pri': 13, 'url': 'https://ishikawa-gotoeat-cpn.com/cities/%e6%b4%a5%e5%b9%a1%e7%94%ba/',                   'yomi': ['tsubata',         'つばた']},
-			\ '内灘町':     {'pri': 14, 'url': 'https://ishikawa-gotoeat-cpn.com/cities/%e5%86%85%e7%81%98%e7%94%ba/',                   'yomi': ['utinada',         'うちなだ']},
-			\ '志賀町':     {'pri': 15, 'url': 'https://ishikawa-gotoeat-cpn.com/cities/%e5%bf%97%e8%b3%80%e7%94%ba/',                   'yomi': ['sika',            'しか']},
-			\ '宝達志水町': {'pri': 16, 'url': 'https://ishikawa-gotoeat-cpn.com/cities/%e5%ae%9d%e9%81%94%e5%bf%97%e6%b0%b4%e7%94%ba/', 'yomi': ['houdatsushimizu', 'ほうだつしみず']},
-			\ '中能登町':   {'pri': 17, 'url': 'https://ishikawa-gotoeat-cpn.com/cities/%e4%b8%ad%e8%83%bd%e7%99%bb%e7%94%ba/',          'yomi': ['nakanoto',        'なかのと']},
-			\ '穴水町':     {'pri': 18, 'url': 'https://ishikawa-gotoeat-cpn.com/cities/%e7%a9%b4%e6%b0%b4%e7%94%ba/',                   'yomi': ['anamizu',         'あなみず']},
-			\ '能登町':     {'pri': 19, 'url': 'https://ishikawa-gotoeat-cpn.com/cities/%e8%83%bd%e7%99%bb%e7%94%ba/',                   'yomi': ['noto',            'のと']}
+			\ '金沢市':     {'pri': 1,  'url': 'https://ishikawa-gotoeat-cpn.com/?cities=%e9%87%91%e6%b2%a2%e5%b8%82',                   'yomi': ['kanazawa',        'かなざわ']},
+			\ '七尾市':     {'pri': 2,  'url': 'https://ishikawa-gotoeat-cpn.com/?cities=%e4%b8%83%e5%b0%be%e5%b8%82',                   'yomi': ['nanao',           'ななお']},
+			\ '小松市':     {'pri': 3,  'url': 'https://ishikawa-gotoeat-cpn.com/?cities=%e5%b0%8f%e6%9d%be%e5%b8%82',                   'yomi': ['komatsu',         'こまつ']},
+			\ '輪島市':     {'pri': 4,  'url': 'https://ishikawa-gotoeat-cpn.com/?cities=%e8%bc%aa%e5%b3%b6%e5%b8%82',                   'yomi': ['wajima',          'わじま']},
+			\ '珠洲市':     {'pri': 5,  'url': 'https://ishikawa-gotoeat-cpn.com/?cities=%e7%8f%a0%e6%b4%b2%e5%b8%82',                   'yomi': ['suzu',            'すず']},
+			\ '加賀市':     {'pri': 6,  'url': 'https://ishikawa-gotoeat-cpn.com/?cities=%e5%8a%a0%e8%b3%80%e5%b8%82',                   'yomi': ['kaga',            'かが']},
+			\ '羽咋市':     {'pri': 7,  'url': 'https://ishikawa-gotoeat-cpn.com/?cities=%e7%be%bd%e5%92%8b%e5%b8%82',                   'yomi': ['hakui',           'はくい']},
+			\ 'かほく市':   {'pri': 8,  'url': 'https://ishikawa-gotoeat-cpn.com/?cities=%e3%81%8b%e3%81%bb%e3%81%8f%e5%b8%82',          'yomi': ['kahoku',          'かほく']},
+			\ '白山市':     {'pri': 9,  'url': 'https://ishikawa-gotoeat-cpn.com/?cities=%e7%99%bd%e5%b1%b1%e5%b8%82',                   'yomi': ['hakusan',         'はくさん']},
+			\ '能美市':     {'pri': 10, 'url': 'https://ishikawa-gotoeat-cpn.com/?cities=%e8%83%bd%e7%be%8e%e5%b8%82',                   'yomi': ['nomi',            'のみ']},
+			\ '野々市市':   {'pri': 11, 'url': 'https://ishikawa-gotoeat-cpn.com/?cities=%e9%87%8e%e3%80%85%e5%b8%82%e5%b8%82',          'yomi': ['nonoichi',        'ののいち']},
+			\ '川北町':     {'pri': 12, 'url': 'https://ishikawa-gotoeat-cpn.com/?cities=%e5%b7%9d%e5%8c%97%e7%94%ba',                   'yomi': ['kawakita',        'かわきた']},
+			\ '津幡町':     {'pri': 13, 'url': 'https://ishikawa-gotoeat-cpn.com/?cities=%e6%b4%a5%e5%b9%a1%e7%94%ba',                   'yomi': ['tsubata',         'つばた']},
+			\ '内灘町':     {'pri': 14, 'url': 'https://ishikawa-gotoeat-cpn.com/?cities=%e5%86%85%e7%81%98%e7%94%ba',                   'yomi': ['utinada',         'うちなだ']},
+			\ '志賀町':     {'pri': 15, 'url': 'https://ishikawa-gotoeat-cpn.com/?cities=%e5%bf%97%e8%b3%80%e7%94%ba',                   'yomi': ['sika',            'しか']},
+			\ '宝達志水町': {'pri': 16, 'url': 'https://ishikawa-gotoeat-cpn.com/?cities=%e5%ae%9d%e9%81%94%e5%bf%97%e6%b0%b4%e7%94%ba', 'yomi': ['houdatsushimizu', 'ほうだつしみず']},
+			\ '中能登町':   {'pri': 17, 'url': 'https://ishikawa-gotoeat-cpn.com/?cities=%e4%b8%ad%e8%83%bd%e7%99%bb%e7%94%ba',          'yomi': ['nakanoto',        'なかのと']},
+			\ '穴水町':     {'pri': 18, 'url': 'https://ishikawa-gotoeat-cpn.com/?cities=%e7%a9%b4%e6%b0%b4%e7%94%ba',                   'yomi': ['anamizu',         'あなみず']},
+			\ '能登町':     {'pri': 19, 'url': 'https://ishikawa-gotoeat-cpn.com/?cities=%e8%83%bd%e7%99%bb%e7%94%ba',                   'yomi': ['noto',            'のと']}
 			\ }
 
-func! tanikawa#goto_eat_ishikawa#ComplIshikawaCity(ArgLead, CmdLine, CursorPos)
+let s:category_list = {
+			\ '居酒屋・和食':         {'pri': 1,  'url': 'https://ishikawa-gotoeat-cpn.com/?cities=&type=%E5%B1%85%E9%85%92%E5%B1%8B%E3%83%BB%E5%92%8C%E9%A3%9F&s&post_type=member_store',                                     'yomi': ['izakaya',          'いざかや']},
+			\ '寿司・回転寿司':       {'pri': 2,  'url': 'https://ishikawa-gotoeat-cpn.com/?cities=&type=%E5%AF%BF%E5%8F%B8%E3%83%BB%E5%9B%9E%E8%BB%A2%E5%AF%BF%E5%8F%B8&s&post_type=member_store',                            'yomi': ['sushi',            'すし',                 'かいてんすし']},
+			\ '洋食':                 {'pri': 3,  'url': 'https://ishikawa-gotoeat-cpn.com/?cities=&type=%E6%B4%8B%E9%A3%9F&s&post_type=member_store',                                                                         'yomi': ['youshoku',         'ようしょく']},
+			\ '中華':                 {'pri': 4,  'url': 'https://ishikawa-gotoeat-cpn.com/?cities=&type=%E4%B8%AD%E8%8F%AF&s&post_type=member_store',                                                                         'yomi': ['chuka',            'tyuka',                'ちゅうか']},
+			\ 'ラーメン':             {'pri': 5,  'url': 'https://ishikawa-gotoeat-cpn.com/?cities=&type=%E3%83%A9%E3%83%BC%E3%83%A1%E3%83%B3&s&post_type=member_store',                                                       'yomi': ['ramen',            'らーめん']},
+			\ 'エスニック・韓国料理': {'pri': 6,  'url': 'https://ishikawa-gotoeat-cpn.com/?cities=&type=%E3%82%A8%E3%82%B9%E3%83%8B%E3%83%83%E3%82%AF%E3%83%BB%E9%9F%93%E5%9B%BD%E6%96%99%E7%90%86&s&post_type=member_store', 'yomi': ['ethnic',           'えすにっく',           'かんこく']},
+			\ '焼肉':                 {'pri': 7,  'url': 'https://ishikawa-gotoeat-cpn.com/?cities=&type=%E7%84%BC%E8%82%89&s&post_type=member_store',                                                                         'yomi': ['yakiniku',         'やきにく']},
+			\ 'ファミリーレストラン': {'pri': 8,  'url': 'https://ishikawa-gotoeat-cpn.com/?cities=&type=%E3%83%95%E3%82%A1%E3%83%9F%E3%83%AA%E3%83%BC%E3%83%AC%E3%82%B9%E3%83%88%E3%83%A9%E3%83%B3&s&post_type=member_store', 'yomi': ['familyrestaurant', 'ふぁみりーれすとらん', 'ファミレス']},
+			\ 'ファストフード':       {'pri': 9,  'url': 'https://ishikawa-gotoeat-cpn.com/?cities=&type=%E3%83%95%E3%82%A1%E3%82%B9%E3%83%88%E3%83%95%E3%83%BC%E3%83%89&s&post_type=member_store',                            'yomi': ['fastfood',         'ふぁすとふーど']},
+			\ 'カフェ・スウィーツ':   {'pri': 10, 'url': 'https://ishikawa-gotoeat-cpn.com/?cities=&type=%E3%82%AB%E3%83%95%E3%82%A7%E3%83%BB%E3%82%B9%E3%82%A6%E3%82%A3%E3%83%BC%E3%83%84&s&post_type=member_store',          'yomi': ['cafe',             'かふぇ']},
+			\ 'その他':               {'pri': 11, 'url': 'https://ishikawa-gotoeat-cpn.com/?cities=&type=%E3%81%9D%E3%81%AE%E4%BB%96&s&post_type=member_store',                                                                'yomi': ['etc',              'そのた']},
+			\ }
+
+func! s:ComplIshikawa(list, ArgLead, CmdLine, CursorPos)
 	let list = []
-	for [key, vals] in items(s:city_list)
+	for [key, vals] in items(a:list)
 		for val in vals.yomi + [key]
 			if val =~ '.*' . a:ArgLead . '.*'
 				let list += [ key ]
@@ -231,8 +263,16 @@ func! tanikawa#goto_eat_ishikawa#ComplIshikawaCity(ArgLead, CmdLine, CursorPos)
 			endif
 		endfor
 	endfor
-	call sort(list, {a,b->s:city_list[a].pri-s:city_list[b].pri})
+	call sort(list, {a,b->a:list[a].pri-a:list[b].pri})
 	return list
+endfunc
+
+func! tanikawa#goto_eat_ishikawa#ComplIshikawaCity(ArgLead, CmdLine, CursorPos)
+	return s:ComplIshikawa(s:city_list, a:ArgLead, a:CmdLine, a:CursorPos)
+endfunc
+
+func! tanikawa#goto_eat_ishikawa#ComplIshikawaCategory(ArgLead, CmdLine, CursorPos)
+	return s:ComplIshikawa(s:category_list, a:ArgLead, a:CmdLine, a:CursorPos)
 endfunc
 
 func! tanikawa#goto_eat_ishikawa#ComplDateDir(ArgLead, CmdLine, CursorPos)
