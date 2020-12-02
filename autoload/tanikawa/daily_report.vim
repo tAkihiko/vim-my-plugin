@@ -51,6 +51,9 @@ function! tanikawa#daily_report#StartWork(...) abort
 		endif
 	endif
 
+	" 勤務場所を設定
+	let l:place = get(g:, 'work_place', "在宅")
+
 	" 引数チェック
 	for l:arg_str in a:000
 
@@ -133,90 +136,15 @@ function! tanikawa#daily_report#StartWork(...) abort
 
 	call append(line('$'), l:text)
 	call append(line('$'), printf("%s %d:%02d-%d:%02d 在宅勤務(谷川)", l:today, l:start_time/60, l:start_time%60, l:end_time/60, l:end_time%60))
+	call append(line('$'), "")
+	call append(line('$'), printf("テレワーク %s", l:today))
+	call append(line('$'), "")
+	call append(line('$'), printf("%s %d:%02d ～ ", l:place, l:start_time/60, l:start_time%60))
 
 	0 delete _
 
 	command! -buffer -range=% CopyStartWorkStr call <SID>CopyStartWorkStr(<line1>,<line2>)
-	nnoremap <buffer><silent> <C-C> :<C-U>CopyStartWorkStr<CR>
-
-endfunction
-
-function! tanikawa#daily_report#StartWork2(...) abort
-
-	" 今日の日付を取得
-	let l:today = strftime('%Y/%m/%d （%a）')
-
-	" 勤務場所を設定
-	let l:place = "在宅"
-	if exists('g:work_place') && type(g:work_place) == v:t_string && len(g:work_place) > 0
-		let l:place = g:work_place
-	endif
-
-	" 業務開始時刻を設定
-	let l:hour = -1
-	let l:min = -1
-	if exists('g:work_start_time_default')
-		if type(g:work_start_time_default) == v:t_list && len(g:work_start_time_default) >= 2
-			let [l:hour, l:min; l:rest] = g:work_start_time_default
-		endif
-	endif
-
-	" 引数チェック
-	for l:arg_str in a:000
-
-		if l:arg_str =~? '^\d\{1,2}:\d\{2}$'
-			" 勤務開始時刻
-			" 8:00, 10:30
-			let [l:hour, l:min; l:rest] = split(l:arg_str, ':', 1)
-			let l:hour = str2nr(l:hour)
-			let l:min = str2nr(l:min)
-
-		elseif l:arg_str =~? '^\d\{3,4}$'
-			" 勤務開始時刻
-			" 800, 1030
-			let l:hour = str2nr(l:arg_str[0:-3])
-			let l:min = str2nr(l:arg_str[-2:-1])
-
-		else
-			" nop
-		endif
-
-	endfor
-
-	" 指定無ければ現在の時間を基準にする
-	let l:time_step = 5
-	if l:hour < 0 || l:min < 0
-		let l:hour = strftime('%H')
-		let l:min = strftime('%M')
-
-		" 時間をキリの良く調整
-		let l:time = l:hour*60 + l:min
-		let l:time += l:time_step - l:time % l:time_step
-		let l:hour = l:time/60
-		let l:min  = l:time%60
-	endif
-
-	" ファイルの開き方を設定
-	if exists('g:tanikawa_daily_report_start_work_opener') && len(g:tanikawa_daily_report_start_work_opener) > 0
-		let edit_cmd = g:tanikawa_daily_report_start_work_opener
-	else
-		let edit_cmd = 'new'
-	endif
-	if expand('%') == "" && &mod == 0 && &bt == ""
-		" そのまま実行
-	else
-		exec 'silent' edit_cmd
-	endif
-
-	setlocal bt=nofile
-
-	call append(line('$'), printf("テレワーク %s", l:today))
-	call append(line('$'), printf("%s %d:%02d ～ ", l:place, l:hour, l:min))
-
-	0 delete _
-
-	command! -buffer -range CopyStartWorkStr call <SID>CopyStartWorkStr(<line1>,<line2>)
-	nnoremap <buffer><silent> <C-C> :<C-U>CopyStartWorkStr<CR>j
+	nnoremap <buffer><silent> <C-C> vip:CopyStartWorkStr<CR>}j
 
 endfunction
 
