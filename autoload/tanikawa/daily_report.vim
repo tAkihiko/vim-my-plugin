@@ -32,7 +32,6 @@ endfunction
 function! tanikawa#daily_report#StartWork(...) abort
 	let l:month = str2nr(strftime('%m'))
 	let l:day = str2nr(strftime('%d'))
-	let l:today = printf("%d/%d(%s)", l:month, l:day, strftime('%a'))
 	let l:time_step = 5
 
 	let l:hour = -1
@@ -135,8 +134,10 @@ function! tanikawa#daily_report#StartWork(...) abort
 	setlocal bt=nofile
 
 	call append(line('$'), l:text)
+	let l:today = printf("%d/%d(%s)", l:month, l:day, strftime('%a'))
 	call append(line('$'), printf("%s %d:%02d-%d:%02d 在宅勤務(谷川)", l:today, l:start_time/60, l:start_time%60, l:end_time/60, l:end_time%60))
 	call append(line('$'), "")
+	let l:today = strftime('%Y/%m/%d （%a）')
 	call append(line('$'), printf("テレワーク %s", l:today))
 	call append(line('$'), "")
 	call append(line('$'), printf("%s %d:%02d ～ ", l:place, l:start_time/60, l:start_time%60))
