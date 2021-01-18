@@ -1,6 +1,12 @@
 scriptencoding utf-8
 " Author: 谷川陽彦 <pureodio1109@gmail.com>
 
+let s:memo_prefix_len = 2
+let s:memo_file_ptn = '\d\{1,' . string(s:memo_prefix_len) . '}_\(.*\)\.txt'
+let s:memo_filename_ptn = '^' . s:memo_file_ptn . '$'
+let s:memo_filepath_ptn = '^\%(.*[\/]\)\?\(' . s:memo_file_ptn . '\)$'
+let s:memo_file_fmt = '%0' . string(s:memo_prefix_len) . 'd_%s.txt'
+
 function! tanikawa#memo#MkMemo(title) abort
 	if exists("g:memo_dir")
 		let l:memo_dir = g:memo_dir
@@ -9,7 +15,7 @@ function! tanikawa#memo#MkMemo(title) abort
 	endif
 
 	if exists('?readdir')
-		let text_list = readdir(l:memo_dir, {n -> n=~ '^\d\{2}_.*\.txt$'})
+		let text_list = readdir(l:memo_dir, {n -> n=~ s:memo_filename_ptn})
 		let cnt = len(text_list)
 	else
 		if has('win32') || has('win64')
@@ -25,10 +31,10 @@ function! tanikawa#memo#MkMemo(title) abort
 		endif
 		call map(text_list, {key, val -> iconv(val, enc, &enc) })
 		call map(text_list, {key, val -> substitute(val, '\r', '', 'g') })
-		call map(text_list, {key, val -> substitute(val, '^\%(.*[\/]\)\?\(\d\{2}_[^\/]*\.txt\)$', '\1', 'g') })
+		call map(text_list, {key, val -> substitute(val, s:memo_filepath_ptn, '\1', 'g') })
 		let cnt = 0
 		for memo in text_list
-			if memo =~? '^\d\{2}_.*\.txt'
+			if memo =~? s:memo_filename_ptn
 				let cnt += 1
 			endif
 		endfor
@@ -44,7 +50,7 @@ function! tanikawa#memo#MkMemo(title) abort
 	let footer  = '# vim: '
 	let footer .= 'ft=memo et ts=4'
 
-	let filename = printf("%02d_%s.txt", cnt + 1, title)
+	let filename = printf(s:memo_file_fmt, cnt + 1, title)
 	let filename = fnameescape(filename)
 
 	let l:memo_dir = substitute(l:memo_dir, ' ', '\\ ', 'g')
@@ -65,7 +71,7 @@ function! tanikawa#memo#EdMemo(preview_mode, title_no) abort
 	endif
 
 	if exists('?readdir')
-		let memo_list = readdir(l:memo_dir, {n -> n=~ '^\d\{2}_.*\.txt$'})
+		let memo_list = readdir(l:memo_dir, {n -> n=~ s:memo_filename_ptn})
 	else
 		if has('win32') || has('win64')
 			let cmd = 'dir /b '.shellescape(l:memo_dir.'\*.txt')
@@ -77,11 +83,11 @@ function! tanikawa#memo#EdMemo(preview_mode, title_no) abort
 		let text_list = systemlist(cmd)
 		call map(text_list, {key, val -> iconv(val, enc, &enc) })
 		call map(text_list, {key, val -> substitute(val, '\r', '', 'g') })
-		call map(text_list, {key, val -> substitute(val, '^\%(.*[\/]\)\?\(\d\{2}_[^\/]*\.txt\)$', '\1', 'g') })
+		call map(text_list, {key, val -> substitute(val, s:memo_filepath_ptn, '\1', 'g') })
 
 		let memo_list = []
 		for memo in text_list
-			if memo =~? '^\d\{2}_.*\.txt$'
+			if memo =~? s:memo_filename_ptn
 				call add(memo_list, memo)
 			endif
 		endfor
@@ -101,7 +107,7 @@ function! tanikawa#memo#EdMemo(preview_mode, title_no) abort
 
 		let menu_list = copy(memo_list)
 		redraw
-		echo join(map(menu_list, {key, val -> printf('%2d: %s', key+1, substitute(val, '^\d\{2}_\(.*\)\.txt$', '\1', ''))}), "\n")
+		echo join(map(menu_list, {key, val -> printf('%'.string(s:memo_prefix_len).'d: %s', key+1, substitute(val, s:memo_filename_ptn, '\1', ''))}), "\n")
 
 		call inputsave()
 		let sel_str = input('> ')
