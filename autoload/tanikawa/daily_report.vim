@@ -54,6 +54,25 @@ function! tanikawa#daily_report#StartWork(...) abort
 	let l:place = get(g:, 'work_place', "在宅")
 
 	" 引数チェック
+	" AM/PM判定は先に実施
+	for l:arg_str in a:000
+
+		if l:arg_str =~? 'am'
+			let l:has_end_time = v:true
+			let l:hour_e = 12
+			let l:min_e = 0
+		elseif l:arg_str =~? 'pm'
+			let l:time_cnt += 1
+			let l:hour = 13
+			let l:min = 0
+			let l:work_time = float2nr(get(g:, 'default_pm_work_time', 5.0*60))
+		else
+			" nop
+		endif
+	endfor
+
+	" 引数チェック
+	" 時間設定
 	for l:arg_str in a:000
 
 		if l:arg_str =~? '^\d\{1,2}:\d\{2}$'
@@ -62,7 +81,7 @@ function! tanikawa#daily_report#StartWork(...) abort
 				let [l:hour, l:min; l:rest] = split(l:arg_str, ':', 1)
 				let l:hour = str2nr(l:hour)
 				let l:min = str2nr(l:min)
-			else
+			elseif !l:has_end_time
 				let l:has_end_time = v:true
 				let [l:hour_e, l:min_e; l:rest] = split(l:arg_str, ':', 1)
 				let l:hour_e = str2nr(l:hour_e)
@@ -75,7 +94,7 @@ function! tanikawa#daily_report#StartWork(...) abort
 			if l:time_cnt == 0
 				let l:hour = str2nr(l:arg_str[0:-3])
 				let l:min = str2nr(l:arg_str[-2:-1])
-			else
+			elseif !l:has_end_time
 				let l:has_end_time = v:true
 				let l:hour_e = str2nr(l:arg_str[0:-3])
 				let l:min_e = str2nr(l:arg_str[-2:-1])
