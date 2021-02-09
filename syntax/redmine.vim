@@ -24,4 +24,4 @@ highlight link rmTicketNo Special
 highlight link rmCommitHash Special
 highlight link rmPicture Identifier
 
-let b:current_syntax = "weekly_report"
+let b:current_syntax = "redmine"
