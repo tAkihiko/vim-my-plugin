@@ -1,7 +1,8 @@
 scriptencoding utf-8
 " Author: 谷川陽彦 <pureodio1109@gmail.com>
 
-command! -complete=customlist,<SID>CompWeeklyReport -nargs=? WRMkWeeklyReport call tanikawa#weekly_report#MkWeeklyReport(<q-args>)
+let s:prefix = tanikawa#util#GetPrefix('WR')
+exec 'command! -complete=customlist,<SID>CompWeeklyReport -nargs=?' s:prefix . 'MkWeeklyReport' 'call tanikawa#weekly_report#MkWeeklyReport(<q-args>)'
 
 function! s:CompWeeklyReport( arglead, cmdline, curpos )
 	if exists("g:weekly_report_dir")
