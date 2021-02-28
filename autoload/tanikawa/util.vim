@@ -24,3 +24,10 @@ function! tanikawa#util#ReplaceToErrorFormat() abort
 	let line = substitute(line, '\\', '%\\\\', 'g')
 	call setline('.', line)
 endfunction
+
+function! tanikawa#util#GetPrefix(prefix)
+	if exists('g:tanikawa#util#prefix_disable') && type(g:tanikawa#util#prefix_disable) == v:t_dict && has_key(g:tanikawa#util#prefix_disable, a:prefix)
+		return ""
+	endif
+	return a:prefix
+endfunction
