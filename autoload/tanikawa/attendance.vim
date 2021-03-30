@@ -20,7 +20,7 @@ function! tanikawa#attendance#AttendanceReport(...) abort
 			let l:year = str2nr(l:year)
 			let l:month = str2nr(l:month)
 			let l:day = str2nr(l:day)
-		elseif l:arg_str =~? '^\d\{1,2}/\d\{1,2}$'
+		elseif l:arg_str =~? '^\d\{1,2}/\d\{1,2}\%(\s*[(（].[)）]\s*\)$'
 			" 8/1, 10/30
 			let [l:month, l:day; l:rest] = split(l:arg_str, '/', 1)
 			let l:month = str2nr(l:month)
@@ -88,6 +88,32 @@ function! tanikawa#attendance#AttendanceReport(...) abort
 	command! -buffer CopyAttendanceReport call <SID>CopyAttendanceReport()
 	nnoremap <buffer><silent> <C-C> :<C-U>CopyAttendanceReport<CR>
 
+endfunction
+
+function! tanikawa#attendance#AttendanceReportComp(arg, cmd, pos)
+	if len(split(a:cmd, '\s\+', 1)) < 3
+		let l:year = str2nr(strftime('%Y'))
+		let l:month = str2nr(strftime('%m'))
+		let l:day = str2nr(strftime('%d'))
+		let l:today = s:DateTime.from_date(l:year, l:month, l:day)
+
+		let list = []
+		for l:cnt in range(15) " 当日 + 2週間
+			let l:date = l:today.to(s:DateTime.delta(l:cnt,0))
+			let l:week = l:date.day_of_week()
+			if l:week == 0 || l:week == 6
+				" 土日はスキップ
+				continue
+			endif
+			let list += [printf("%d/%d（%s）", l:date.month(), l:date.day(), l:date.format('%a'))]
+		endfor
+		let list += ["am", "pm"]
+		return join(list, "\n")
+	else
+		return "am\npm"
+	endif
+
+	return ""
 endfunction
 
 function! s:CopyAttendanceReport() abort
