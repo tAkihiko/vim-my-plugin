@@ -3,8 +3,7 @@ scriptencoding utf-8
 
 let s:prefix = tanikawa#util#GetPrefix('MT')
 
-exec 'command!' s:prefix . 'MkTagsC'   'call tanikawa#make_tags#MakeTags("c")'
-exec 'command!' s:prefix . 'MkTagsCS'  'call tanikawa#make_tags#MakeTags("cs")'
-exec 'command!' s:prefix . 'MkTagsVBA' 'call tanikawa#make_tags#MakeTags("vba")'
-exec 'command!' s:prefix . 'MkTags'    'call tanikawa#make_tags#MakeTags("all")'
-
+exec 'command! -nargs=* -complete=dir' s:prefix . 'MkTagsC'   'call tanikawa#make_tags#MakeTags("c", <f-args>)'
+exec 'command! -nargs=* -complete=dir' s:prefix . 'MkTagsCS'  'call tanikawa#make_tags#MakeTags("cs", <f-args>)'
+exec 'command! -nargs=* -complete=dir' s:prefix . 'MkTagsVBA' 'call tanikawa#make_tags#MakeTags("vba", <f-args>)'
+exec 'command! -nargs=* -complete=dir' s:prefix . 'MkTags'    'call tanikawa#make_tags#MakeTags("all", <f-args>)'
