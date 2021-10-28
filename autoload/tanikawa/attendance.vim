@@ -20,7 +20,7 @@ function! tanikawa#attendance#AttendanceReport(...) abort
 			let l:year = str2nr(l:year)
 			let l:month = str2nr(l:month)
 			let l:day = str2nr(l:day)
-		elseif l:arg_str =~? '^\d\{1,2}/\d\{1,2}\%(\s*[(（].[)）]\s*\)$'
+		elseif l:arg_str =~? '^\d\{1,2}/\d\{1,2}\%(\s*[(（].[)）]\s*\)\?$'
 			" 8/1, 10/30
 			let [l:month, l:day; l:rest] = split(l:arg_str, '/', 1)
 			let l:month = str2nr(l:month)
