@@ -13,9 +13,9 @@ function! tanikawa#code_reading#SetSourceCodeCheckMode(set)
 		nnoremap <silent> <C-P> :cp<CR>
 		nnoremap <silent> g<C-N> :cnewer<CR>:cc<CR>
 		nnoremap <silent> g<C-P> :colder<CR>:cc<CR>
-		command! UnSetChkMode call tanikawa#code_reading#SetSourceCodeCheckMode(0)
-		delcommand SetChkMode
-		delcommand SetChkModeL
+		command! CRUnSetChkMode call tanikawa#code_reading#SetSourceCodeCheckMode(0)
+		delcommand CRSetChkMode
+		delcommand CRSetChkModeL
 
 	elseif a:set == 2
 		" Location list
@@ -27,9 +27,9 @@ function! tanikawa#code_reading#SetSourceCodeCheckMode(set)
 		nnoremap <silent> <C-P> :lprev<CR>
 		nnoremap <silent> g<C-N> :lnewer<CR>:ll<CR>
 		nnoremap <silent> g<C-P> :lolder<CR>:ll<CR>
-		command! UnSetChkMode call tanikawa#code_reading#SetSourceCodeCheckMode(0)
-		delcommand SetChkMode
-		delcommand SetChkModeL
+		command! CRUnSetChkMode call tanikawa#code_reading#SetSourceCodeCheckMode(0)
+		delcommand CRSetChkMode
+		delcommand CRSetChkModeL
 
 	else
 		call s:ResetNMap( '<C-N>', g:pre_nmap_n )
@@ -37,9 +37,9 @@ function! tanikawa#code_reading#SetSourceCodeCheckMode(set)
 		call s:ResetNMap( 'g<C-N>', g:pre_nmap_gn )
 		call s:ResetNMap( 'g<C-P>', g:pre_nmap_gp )
 
-		delcommand UnSetChkMode
-		command! SetChkMode call tanikawa#code_reading#SetSourceCodeCheckMode(1)
-		command! SetChkModeL call tanikawa#code_reading#SetSourceCodeCheckMode(2)
+		delcommand CRUnSetChkMode
+		command! CRSetChkMode call tanikawa#code_reading#SetSourceCodeCheckMode(1)
+		command! CRSetChkModeL call tanikawa#code_reading#SetSourceCodeCheckMode(2)
 	endif
 endfunction
 
@@ -61,15 +61,15 @@ function! tanikawa#code_reading#SetSourceCodeCopyMode(set)
 		let g:pre_xmap_c = maparg('<C-C>', 'x', v:false, v:true)
 		nnoremap <silent> <C-C> :CopySrcCode<CR>
 		xnoremap <silent> <C-C> :CopySrcCode<CR>
-		command! UnSetCpMode call tanikawa#code_reading#SetSourceCodeCopyMode(0)
-		delcommand SetCpMode
+		command! CRUnSetCpMode call tanikawa#code_reading#SetSourceCodeCopyMode(0)
+		delcommand CRSetCpMode
 
 	else
 		call s:ResetNMap( '<C-C>', g:pre_nmap_c )
 		call s:ResetXMap( '<C-C>', g:pre_xmap_c )
 
-		delcommand UnSetCpMode
-		command! SetCpMode call tanikawa#code_reading#SetSourceCodeCopyMode(1)
+		delcommand CRUnSetCpMode
+		command! CRSetCpMode call tanikawa#code_reading#SetSourceCodeCopyMode(1)
 	endif
 endfunction
 
