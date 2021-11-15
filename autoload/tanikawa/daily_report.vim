@@ -37,7 +37,7 @@ function! tanikawa#daily_report#StartWork(...) abort
 	let l:hour = -1
 	let l:min = -1
 	let l:auto_adjust = v:false
-	let l:work_time = 9*60 " 8時間労働 + 1時間休憩
+	let l:work_time = 60 * get(g:, 'work_time_default', 9) " 8時間労働 + 1時間休憩
 	let l:has_end_time = v:false
 	let l:hour_e = -1
 	let l:min_e = -1
