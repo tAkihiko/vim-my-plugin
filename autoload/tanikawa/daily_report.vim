@@ -53,27 +53,35 @@ function! tanikawa#daily_report#StartWork(...) abort
 	" 勤務場所を設定
 	let l:place = get(g:, 'work_place', "在宅")
 
+	let l:args = copy(a:000)
+
 	" 引数チェック
 	" AM/PM判定は先に実施
-	for l:arg_str in a:000
+	let l:idx = 0
+	for l:arg_str in l:args
 
 		if l:arg_str =~? 'am'
 			let l:has_end_time = v:true
 			let l:hour_e = 12
 			let l:min_e = 0
+			call remove(l:args, l:idx)
 		elseif l:arg_str =~? 'pm'
 			let l:time_cnt += 1
 			let l:hour = 13
 			let l:min = 0
 			let l:work_time = float2nr(get(g:, 'default_pm_work_time', 5.0*60))
+			call remove(l:args, l:idx)
 		else
-			" nop
+			let l:idx += 1
 		endif
 	endfor
 
+	" 追加の文言
+	let l:extra_message = ""
+
 	" 引数チェック
 	" 時間設定
-	for l:arg_str in a:000
+	for l:arg_str in l:args
 
 		if l:arg_str =~? '^\d\{1,2}:\d\{2}$'
 			" 8:00, 10:30
@@ -107,9 +115,15 @@ function! tanikawa#daily_report#StartWork(...) abort
 			let l:work_time = float2nr(str2float(l:work_time_str) * 60.0 + 0.5)
 
 		else
-			" nop
+			" 追加メッセージ
+			let l:extra_message .= l:arg_str
 		endif
 	endfor
+
+	" 追加の文言がなければデフォルトメッセージ表示
+	if len(l:extra_message) <= 0
+		let l:extra_message = get(g:, 'work_start_extra_message', "")
+	endif
 
 	" 指定無ければ現在の時間を基準にする
 	if l:hour < 0 || l:min < 0
@@ -153,7 +167,9 @@ function! tanikawa#daily_report#StartWork(...) abort
 	setlocal bt=nofile
 
 	call append(line('$'), l:text)
-	call append(line('$'), "")
+	if 0 < len(l:extra_message)
+		call append(line('$'), l:extra_message)
+	endif
 	let l:today = printf("%d/%d(%s)", l:month, l:day, strftime('%a'))
 	call append(line('$'), printf("%s %s勤務(谷川) %d:%02d-%d:%02d", l:today, l:place, l:start_time/60, l:start_time%60, l:end_time/60, l:end_time%60))
 	" let l:today = strftime('%Y/%m/%d （%a）')
