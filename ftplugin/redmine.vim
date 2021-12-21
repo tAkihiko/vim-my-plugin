@@ -11,4 +11,4 @@ runtime! ftplugin/textile.vim
 
 setlocal foldmethod=marker foldmarker={{collapse,}} commentstring=
 
-let b:undo_ftplugin = "fdm< fmr< cms<"
+let b:undo_ftplugin = "setl fdm< fmr< cms<"

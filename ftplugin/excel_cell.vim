@@ -10,4 +10,4 @@ let b:did_ftplugin = 1
 setlocal expandtab noendofline nofixendofline
 set fenc=cp932
 
-let b:undo_ftplugin = "et< eol< fixeol<"
+let b:undo_ftplugin = "setlocal et< eol< fixeol<"
