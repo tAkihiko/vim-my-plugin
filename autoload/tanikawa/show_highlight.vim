@@ -11,5 +11,15 @@ function! tanikawa#show_highlight#ShowHlItem()
 	return synIDattr(synID(line("."), col("."), 1), "name")
 endfunction
 
+function! tanikawa#show_highlight#ShowHl()
+	let item = tanikawa#show_highlight#ShowHlItem()
+	let group = tanikawa#show_highlight#ShowHlGroup()
+	if item == group
+		return item
+	else
+		return item . " (" . group . ")"
+	endif
+endfunction
+
 " https://hail2u.net/blog/software/vim-show-highlight-group-name-under-cursor.html
 " https://rcmdnk.com/blog/2013/12/01/computer-vim/
