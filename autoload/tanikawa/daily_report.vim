@@ -43,6 +43,18 @@ function! tanikawa#daily_report#StartWork(...) abort
 	let l:min_e = -1
 	let l:time_cnt = 0
 
+	" 現在時刻の取得
+	let l:time_now = s:DateTime.now()
+
+	" 曜日ごとの work_time を設定
+	let l:weekly_work_time_list = get(g:, 'weekly_work_time_list', {})
+	let l:time_now_week = l:time_now.day_of_week()
+	for [key, val] in items(l:weekly_work_time_list)
+		if str2nr(key) == l:time_now_week
+			let l:work_time = float2nr(60 * val)
+		endif
+	endfor
+
 	" 業務開始時刻を設定
 	if exists('g:work_start_time_default')
 		if type(g:work_start_time_default) == v:t_list && len(g:work_start_time_default) >= 2
@@ -144,7 +156,6 @@ function! tanikawa#daily_report#StartWork(...) abort
 	endif
 
 	" 時間が過ぎていたら文章を変える
-	let l:time_now = s:DateTime.now()
 	let l:time_target = s:DateTime.from_date(l:time_now.year(),l:time_now.month(),l:time_now.day(),l:start_time/60,l:start_time%60)
 	if l:time_now.compare(l:time_target) > 0
 		let l:text = "連絡が遅れましたが、業務を開始しています。"
