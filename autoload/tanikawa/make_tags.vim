@@ -31,27 +31,27 @@ endfunction
 
 function! s:MakeTags_C(top_dir=".")
 	echo "C"
-	let cmd = 'ctags --jcode=sjis --languages=C,C++ --fields=+imaSz -f c.sjis.tags -R ' . a:top_dir
+	let cmd = 'ctags --input-encoding=sjis --languages=C,C++ --fields=+imaSz -f c.sjis.tags -R ' . a:top_dir
 	call system(cmd)
-	let cmd = 'ctags --jcode=utf8 --languages=C,C++ --fields=+imaSz -f c.utf8.tags -R ' . a:top_dir
+	let cmd = 'ctags --input-encoding=utf8 --languages=C,C++ --fields=+imaSz -f c.utf8.tags -R ' . a:top_dir
 	call system(cmd)
 endfunction
 
 function! s:MakeTags_CS(top_dir=".")
 	echo "CS"
 	" --c#-kinds はデフォルトのまま
-	let cmd = 'ctags --jcode=utf8 --languages=C# --fields=+imaSz -f cs.tags -R ' . a:top_dir
+	let cmd = 'ctags --input-encoding=utf8 --languages=C# --fields=+imaSz -f cs.tags -R ' . a:top_dir
 	call system(cmd)
 endfunction
 
 function! s:MakeTags_VBA(top_dir=".")
 	echo "VBA"
-	let cmd = 'ctags --jcode=sjis --languages=Basic --langmap=Basic:.vb --fields=+imaSz -f vba.tags -R ' . a:top_dir
+	let cmd = 'ctags --input-encoding=sjis --languages=Basic --langmap=Basic:.vb --fields=+imaSz -f vba.tags -R ' . a:top_dir
 	call system(cmd)
 endfunction
 
 function! s:MakeTags_All(top_dir=".")
 	echo "ALL"
-	let cmd = 'ctags --jcode=utf8 --fields=+imaSz -f tags -R ' . a:top_dir
+	let cmd = 'ctags --input-encoding=utf8 --fields=+imaSz -f tags -R ' . a:top_dir
 	call system(cmd)
 endfunction
