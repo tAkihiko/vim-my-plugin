@@ -5,6 +5,7 @@ function! tanikawa#make_tags#MakeTags(file_type, ...)
 
 	if !executable('ctags')
 		echoerr "ctags が見つかりません"
+		return
 	endif
 
 	let top_dirs = a:000
